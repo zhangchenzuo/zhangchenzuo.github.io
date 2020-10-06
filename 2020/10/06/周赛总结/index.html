@@ -8,12 +8,12 @@
   <link rel="dns-prefetch" href="http://example.com">
   <title>小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="[TOC] 1583.统计不开心的朋友 比较暴力的方法，主要考察的还是数据结构。 12345678910111213141516171819202122232425262728293031323334class Solution &amp;#123;    public int unhappyFriends(int n, int[][] preferences, int[][] pairs) &amp;#123;">
+  <meta name="description" content="1583.统计不开心的朋友 比较暴力的方法，主要考察的还是数据结构。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="小张的技术小木屋">
 <meta property="og:url" content="http://example.com/2020/10/06/%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
-<meta property="og:description" content="[TOC] 1583.统计不开心的朋友 比较暴力的方法，主要考察的还是数据结构。 12345678910111213141516171819202122232425262728293031323334class Solution &amp;#123;    public int unhappyFriends(int n, int[][] preferences, int[][] pairs) &amp;#123;">
+<meta property="og:description" content="1583.统计不开心的朋友 比较暴力的方法，主要考察的还是数据结构。">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20200923155807723.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20200923160127209.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
@@ -23,7 +23,7 @@
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20200923163927223.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20200923195851926.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
 <meta property="article:published_time" content="2020-10-06T12:17:52.962Z">
-<meta property="article:modified_time" content="2020-10-06T12:20:14.058Z">
+<meta property="article:modified_time" content="2020-10-06T14:48:42.599Z">
 <meta property="article:author" content="Chenzuo Zhang">
 <meta property="article:tag" content="Java,Leetcode,工程师,代码,后端开发,大数据开发">
 <meta name="twitter:card" content="summary">
@@ -47,6 +47,9 @@
 
 <meta name="generator" content="Hexo 5.2.0"></head>
 
+
+    <script type="text/javascript" src="/js/love.js"></script>
+
 <body>
   <div id="container" q-class="show:isCtnShow">
     <canvas id="anm-canvas" class="anm-canvas"></canvas>
@@ -56,7 +59,7 @@
 <div class="intrude-less">
 	<header id="header" class="inner">
 		<a href="/" class="profilepic">
-			<img src="/source/img/photo.jpg" class="js-avatar">
+			<img src="/assets/img/photo.jpg" class="js-avatar">
 		</a>
 		<hgroup>
 		  <h1 class="header-author"><a href="/"></a></h1>
@@ -67,6 +70,10 @@
 			<ul>
 			
 				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/categories">分类</a></li>
+	        
+				<li><a href="/archives">归档</a></li>
 	        
 			</ul>
 		</nav>
@@ -90,9 +97,7 @@
 				
 					<a class="github" target="_blank" href="https://github.com/zhangchenzuo" title="github"><i class="icon-github"></i></a>
 		        
-					<a class="csdn" target="_blank" href="https://blog.csdn.net/zcz5566719" title="csdn"><i class="icon-csdn"></i></a>
-		        
-					<a class="mail" target="_blank" href="/chenzuo.zhang@foxmail.com" title="mail"><i class="icon-mail"></i></a>
+					<a class="mail" target="_blank" href="mailto:chenzuo.zhang@foxmail.com" title="mail"><i class="icon-mail"></i></a>
 		        
 			</div>
 		</nav>
@@ -110,13 +115,17 @@
 	<div class="intrude-less">
 		<header id="header" class="inner">
 			<div class="profilepic">
-				<img src="/source/img/photo.jpg" class="js-avatar">
+				<img src="/assets/img/photo.jpg" class="js-avatar">
 			</div>
 			<hgroup>
 			  <h1 class="header-author js-header-author"></h1>
 			</hgroup>
 			
 			
+			
+				
+			
+				
 			
 				
 			
@@ -127,18 +136,20 @@
 					
 						<a class="github" target="_blank" href="https://github.com/zhangchenzuo" title="github"><i class="icon-github"></i></a>
 			        
-						<a class="csdn" target="_blank" href="https://blog.csdn.net/zcz5566719" title="csdn"><i class="icon-csdn"></i></a>
-			        
-						<a class="mail" target="_blank" href="/chenzuo.zhang@foxmail.com" title="mail"><i class="icon-mail"></i></a>
+						<a class="mail" target="_blank" href="mailto:chenzuo.zhang@foxmail.com" title="mail"><i class="icon-mail"></i></a>
 			        
 				</div>
 			</nav>
 
 			<nav class="header-menu js-header-menu">
-				<ul style="width: 50%">
+				<ul style="width: 70%">
 				
 				
-					<li style="width: 100%"><a href="/">主页</a></li>
+					<li style="width: 33.333333333333336%"><a href="/">主页</a></li>
+		        
+					<li style="width: 33.333333333333336%"><a href="/categories">分类</a></li>
+		        
+					<li style="width: 33.333333333333336%"><a href="/archives">归档</a></li>
 		        
 				</ul>
 			</nav>
@@ -158,9 +169,11 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>[TOC]</p>
-<h1 id="1583-统计不开心的朋友"><a href="#1583-统计不开心的朋友" class="headerlink" title="1583.统计不开心的朋友"></a>1583.统计不开心的朋友</h1><p><img src="https://img-blog.csdnimg.cn/20200923155807723.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+        <h1 id="1583-统计不开心的朋友"><a href="#1583-统计不开心的朋友" class="headerlink" title="1583.统计不开心的朋友"></a>1583.统计不开心的朋友</h1><p><img src="https://img-blog.csdnimg.cn/20200923155807723.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 <p>比较暴力的方法，主要考察的还是数据结构。</p>
+<a id="more"></a>
+
+
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">unhappyFriends</span><span class="params">(<span class="keyword">int</span> n, <span class="keyword">int</span>[][] preferences, <span class="keyword">int</span>[][] pairs)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> ans = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span>[] index = <span class="keyword">new</span> <span class="keyword">int</span>[n];</span><br><span class="line">        <span class="comment">// 维护一个匹配数组</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span> ;i&lt;pairs.length;i++)&#123;</span><br><span class="line">            <span class="keyword">int</span>[] cur = pairs[i];</span><br><span class="line">            index[cur[<span class="number">0</span>]] = cur[<span class="number">1</span>];</span><br><span class="line">            index[cur[<span class="number">1</span>]] = cur[<span class="number">0</span>];</span><br><span class="line">        &#125;</span><br><span class="line">		<span class="comment">// 维护每个人心中的排位</span></span><br><span class="line">        <span class="keyword">int</span>[][] count = <span class="keyword">new</span> <span class="keyword">int</span>[n][n]; <span class="comment">// 表示i心中在j的顺位</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>;i&lt;n;i++)&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j&lt;n-<span class="number">1</span>;j++)&#123;</span><br><span class="line">                count[i][preferences[i][j]] = j+<span class="number">1</span>; <span class="comment">// 越大好感越低</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">		<span class="comment">// 开始检查，外层循环每个人，内存枚举如果匹配其他的人。</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i&lt;n; i++)&#123;<span class="comment">// 当前人</span></span><br><span class="line">            <span class="keyword">int</span> with = index[i]; <span class="comment">// 当前人匹配的人</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j&lt;n-<span class="number">1</span>; j++)&#123;</span><br><span class="line">                <span class="keyword">int</span> cur = preferences[i][j]; <span class="comment">//// 当前人好感的人</span></span><br><span class="line">                <span class="keyword">if</span> (cur == with) <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">int</span> with_with = index[cur]; <span class="comment">// 好感人匹配的人</span></span><br><span class="line">                <span class="comment">// 好感人对匹配人的好感低于对当前人</span></span><br><span class="line">                <span class="keyword">if</span> (count[cur][with_with]&gt;count[cur][i]) &#123;</span><br><span class="line">                    ans++;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h1 id="1584-连接所有点的最小费用（最小连通树）"><a href="#1584-连接所有点的最小费用（最小连通树）" class="headerlink" title="1584.连接所有点的最小费用（最小连通树）"></a>1584.连接所有点的最小费用（最小连通树）</h1><p>经典最小连通树的问题，注意一下这里的Java版本的写法和优化。这里的图是一个稠密图，也就是说点少边多。比较适合prim算法。</p>
@@ -195,32 +208,6 @@
 
       
 
-      
-        <div class="page-reward">
-          <a href="javascript:;" class="page-reward-btn tooltip-top">
-            <div class="tooltip tooltip-east">
-            <span class="tooltip-item">
-              赏
-            </span>
-            <span class="tooltip-content">
-              <span class="tooltip-text">
-                <span class="tooltip-inner">
-                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃烤冷面<i class="icon icon-quo-right"></i></p>
-                  <div class="reward-box">
-                    
-                    
-                    <div class="reward-box-item">
-                      <img class="reward-img" src="/sorce/img/wxpay.jpg">
-                      <span class="reward-type">微信</span>
-                    </div>
-                    
-                  </div>
-                </span>
-              </span>
-            </span>
-          </div>
-          </a>
-        </div>
       
     </div>
     <div class="article-info article-info-index">
@@ -302,6 +289,19 @@
         </div>
         
         
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1583-%E7%BB%9F%E8%AE%A1%E4%B8%8D%E5%BC%80%E5%BF%83%E7%9A%84%E6%9C%8B%E5%8F%8B"><span class="toc-number">1.</span> <span class="toc-text">1583.统计不开心的朋友</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1584-%E8%BF%9E%E6%8E%A5%E6%89%80%E6%9C%89%E7%82%B9%E7%9A%84%E6%9C%80%E5%B0%8F%E8%B4%B9%E7%94%A8%EF%BC%88%E6%9C%80%E5%B0%8F%E8%BF%9E%E9%80%9A%E6%A0%91%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">1584.连接所有点的最小费用（最小连通树）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1585-%E6%A3%80%E6%9F%A5%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%98%AF%E5%90%A6%E5%8F%AF%E4%BB%A5%E9%80%9A%E8%BF%87%E6%8E%92%E5%BA%8F%E5%AD%90%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%BE%97%E5%88%B0%E5%8F%A6%E4%B8%80%E4%B8%AA%E5%AD%97%E7%AC%A6%E4%B8%B2-%E6%80%9D%E8%B7%AF"><span class="toc-number">3.</span> <span class="toc-text">1585. 检查字符串是否可以通过排序子字符串得到另一个字符串(思路)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1588-%E6%89%80%E6%9C%89%E5%A5%87%E6%95%B0%E9%95%BF%E5%BA%A6%E7%9A%84%E5%AD%90%E4%B8%B2%E5%92%8C%EF%BC%88%E4%BD%8E%E5%A4%8D%E6%9D%82%E5%BA%A6%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">1588.所有奇数长度的子串和（低复杂度）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1589-%E6%89%80%E6%9C%89%E6%8E%92%E5%88%97%E4%B8%AD%E7%9A%84%E6%9C%80%E5%A4%A7%E5%92%8C%EF%BC%88%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84%EF%BC%89"><span class="toc-number">5.</span> <span class="toc-text">1589.所有排列中的最大和（差分数组）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1590-%E4%BD%BF%E6%95%B0%E7%BB%84%E5%92%8C%E8%83%BD%E8%A2%ABP%E6%95%B4%E9%99%A4"><span class="toc-number">6.</span> <span class="toc-text">1590.使数组和能被P整除</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1591-%E5%A5%87%E6%80%AA%E7%9A%84%E6%89%93%E5%8D%B0%E6%9C%BAII%EF%BC%88%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%EF%BC%89"><span class="toc-number">7.</span> <span class="toc-text">1591.奇怪的打印机II（拓扑排序）</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
     </div>
 </aside>
 
@@ -328,11 +328,23 @@
     		&copy; 2020 Chenzuo Zhang
     	</div>
       	<div class="footer-right">
-      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+    
+    
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+      		<span id="busuanzi_container_site_pv">
+                本站总访问量：<span id="busuanzi_value_site_pv"></span>次
+            </span>
+            <span class="post-meta-divider">|</span>
+            <span id="busuanzi_container_site_uv">
+                本站访客数：<span id="busuanzi_value_site_uv"></span>人
+            </span>
+    
+    
       	</div>
     </div>
   </div>
 </footer>
+
     </div>
     <script>
 	var yiliaConfig = {
@@ -477,15 +489,11 @@ MathJax.Hub.Queue(function() {
         <ul class="search-ul">
           
             <li class="search-li">
-              <a href="https://blog.csdn.net/zcz5566719" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接1</a>
+              <a href="https://blog.csdn.net/zcz5566719" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>我的CSDN小站</a>
             </li>
           
             <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接2</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接3</a>
+              <a href="https://ryanxingql.github.io" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>某大神的blog</a>
             </li>
           
         </ul>
@@ -496,7 +504,7 @@ MathJax.Hub.Queue(function() {
     
     	<section class="tools-section tools-section-me" q-show="aboutme">
   	  	
-  	  		<div class="aboutme-wrap" id="js-aboutme">很惭愧&lt;br&gt;&lt;br&gt;只做了一点微小的工作&lt;br&gt;谢谢大家</div>
+  	  		<div class="aboutme-wrap" id="js-aboutme">一名努力奋斗的小菜鸡&lt;br&gt;&lt;br&gt;励志称为好的后端工程师&lt;br&gt;相信日拱一卒，功不唐捐^.^</div>
   	  	
     	</section>
     

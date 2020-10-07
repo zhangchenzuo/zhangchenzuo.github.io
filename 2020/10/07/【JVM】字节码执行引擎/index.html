@@ -6,18 +6,24 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Tag: Leetcode | 小张的技术小木屋</title>
+  <title>【JVM】字节码执行引擎 | 小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
-<meta property="og:type" content="website">
-<meta property="og:title" content="小张的技术小木屋">
-<meta property="og:url" content="http://example.com/tags/Leetcode/index.html">
+  <meta name="description" content="字节码执行引擎功能：输入字节码文件，然后对字节码进行解析并处理，最后输出执行的结果。实现方法：解释器直接解释或者即时编译生成本地代码，编译执行。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【JVM】字节码执行引擎">
+<meta property="og:url" content="http://example.com/2020/10/07/%E3%80%90JVM%E3%80%91%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
-<meta property="og:description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
+<meta property="og:description" content="字节码执行引擎功能：输入字节码文件，然后对字节码进行解析并处理，最后输出执行的结果。实现方法：解释器直接解释或者即时编译生成本地代码，编译执行。">
 <meta property="og:locale">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2020092419421498.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="article:published_time" content="2020-10-07T09:09:38.000Z">
+<meta property="article:modified_time" content="2020-10-07T09:14:05.499Z">
 <meta property="article:author" content="Chenzuo Zhang">
-<meta property="article:tag" content="Java,Leetcode,工程师,代码,后端开发,大数据开发">
+<meta property="article:tag" content="JVM">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="随笔">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/2020092419421498.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
   
     <link rel="alternative" href="/atom.xml" title="小张的技术小木屋" type="application/atom+xml">
   
@@ -175,85 +181,249 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-【JVM】字节码执行引擎" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-
-<a href="/2020/10/07/%E5%91%A8%E8%B5%9B/" class="archive-article-date">
-  	<time datetime="2020-10-07T03:03:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-07</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/10/07/%E5%91%A8%E8%B5%9B/">【周赛总结】1582-1591 最小连通树，差分数组，前缀和+哈希表，拓扑排序转换</a>
+    <h1 class="article-title" itemprop="name">
+      【JVM】字节码执行引擎
     </h1>
   
 
-        <div class="article-info info-on-right">
+        
+        
+        <!-- 不蒜子统计 -->
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
+
+<a href="/2020/10/07/%E3%80%90JVM%E3%80%91%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/" class="archive-article-date">
+  	<time datetime="2020-10-07T09:09:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-07</time>
+</a>
+        <!-- 需要添加的位置 -->
+        <!-- 开始添加字数统计-->
+        
+          <div style="margin-top:10px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">729字</span>
+      </span>
+    </span>
+
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">  阅读时长: </span>
+        <span class="post-count">2分</span>
+      </span>
+    </span>
+</div>
+
           
+        <!-- 添加完成 -->
+
+        
+
+  
+    <span class="archive-article-date">
+        阅读量 <span id="busuanzi_value_page_pv"></span>
+    </span>
+  
+
+      </header>
+    
+
+  <div class="article-entry" itemprop="articleBody">
+   
+
+	
+		<h1 id="字节码执行引擎"><a href="#字节码执行引擎" class="headerlink" title="字节码执行引擎"></a>字节码执行引擎</h1><p>功能：输入字节码文件，然后对字节码进行解析并处理，最后输出执行的结果。<br>实现方法：解释器直接解释或者即时编译生成本地代码，编译执行。</p>
+<a id="more"></a>
+
+<h1 id="栈帧、局部变量表和运行期间操作数栈的交互"><a href="#栈帧、局部变量表和运行期间操作数栈的交互" class="headerlink" title="栈帧、局部变量表和运行期间操作数栈的交互"></a>栈帧、局部变量表和运行期间操作数栈的交互</h1><ul>
+<li><p>栈帧：方法调用和方法执行，随着方法调用产生和结束。存储了<strong>局部变量，操作数栈，动态链接，方法返回地址</strong>等信息。<br><img src="https://img-blog.csdnimg.cn/2020092419421498.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</li>
+<li><p>局部变量表：</p>
+</li>
+</ul>
+<ol>
+<li>存放<strong>方法参数和方法内部的局部变量</strong>，以slot为单位。</li>
+<li>对于实例方法，0位存储的this；静态方法不会有this。</li>
+<li>先分配方法参数，再分配局部变量。</li>
+<li>slot是可以复用的。这会对GC产生影响。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">byte</span>[] placeholder = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">64</span> * <span class="number">1024</span> * <span class="number">1024</span>];</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 此时不会直接被GC回收，而是等再利用。</span></span><br><span class="line">	<span class="comment">// slot</span></span><br><span class="line">	<span class="comment">// 0 -- args</span></span><br><span class="line">	<span class="comment">// 1 -- placeholder</span></span><br><span class="line">	<span class="comment">// 2 -- a</span></span><br><span class="line">	<span class="keyword">int</span> a = <span class="number">0</span>;</span><br><span class="line">	System.gc();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>操作数栈：存放运行方法期间，各个操作指令的<strong>数据</strong>。每次都是操作栈顶的数据。虚拟机在实现栈帧时候可以能会优化，比如两个栈帧出现重叠的部分，存放公用的数据。。</p>
+</li>
+<li><p>动连接接：每个栈帧持有一个指向<strong>运行时常量池中该栈帧所属方法的引用</strong>，以支持方法调用中的动态连接。<br>动态连接，运行期间转换为直接引用；静态链接，在类加载阶段或者第一次使用的时候就被转化为直接引用</p>
+</li>
+<li><p>返回地址：方法执行以后返回的地址。程序被调用的位置。</p>
+<h1 id="方法调用、静态分配和动态分派"><a href="#方法调用、静态分配和动态分派" class="headerlink" title="方法调用、静态分配和动态分派"></a>方法调用、静态分配和动态分派</h1></li>
+<li><p>方法调用：具体确定调用哪个方法。一切方法调用在Class文件里面存储的都只是符号引用，而不是方法在实际运行时内存布局中的入口地址（也就是之前说的直接引用）。</p>
+</li>
+</ul>
+<p>解析调用是静态过程：</p>
+<p> 被<code>invokestatic</code>和<code>invokespecial</code>指令调用的方法，在解析阶段就确定。<strong>静态方法，私有方法，实例构造器，父类方法四种。再加上<code>final</code>修饰的方法</strong></p>
+<p>运行期动态委派：<br> 实例方法，也称虚方法，因为重载和多态，需要运行时确定。</p>
+<ul>
+<li>分派：静态分派和动态分派</li>
+</ul>
+<p><strong>静态分配</strong>：以来静态类型来定位方法执行版本。比如<strong>重载</strong>。依赖于传入什么静态类型。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Human 称为变量的“静态类型，</span></span><br><span class="line"><span class="comment">//Man 则被称为变量的“实际类型”，这个在运行期才可以最终确定</span></span><br><span class="line">Human man = <span class="keyword">new</span> Man();</span><br><span class="line">Human woman = <span class="keyword">new</span> Woman();</span><br></pre></td></tr></table></figure>
+
+<p><strong>动态分派</strong>：根据运行期的实际类型分配，比如<strong>重写</strong>。依赖于传入的实例对象类型。</p>
+<ul>
+<li>单分派与多分派：分派思考的维度。</li>
+</ul>
+
+	
+   
+
+
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Leetcode</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JVM</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">字符串</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">随笔</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/周赛总结//" class="article-tag-list-link color5">周赛总结</a>
+        			<a href="/categories/JAVA学习总结//" class="article-tag-list-link color4">JAVA学习总结</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/10/07/%E3%80%90JVM%E3%80%91%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2020/10/07/%E5%91%A8%E8%B5%9B/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">【周赛总结】1582-1591 最小连通树，差分数组，前缀和+哈希表，拓扑排序转换</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -288,9 +458,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,

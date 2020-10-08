@@ -6,18 +6,28 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Category: JAVA学习总结 | 小张的技术小木屋</title>
+  <title>【周赛总结】皇位继承顺序（多叉树）， 最多可达成的换楼请求（数位dp） | 小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
-<meta property="og:type" content="website">
-<meta property="og:title" content="小张的技术小木屋">
-<meta property="og:url" content="http://example.com/categories/JAVA%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/index.html">
+  <meta name="description" content="总结第208场周赛。一共两道题目。  1600 皇位继承顺序 M 1601.最多可达成的换楼请求 H">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【周赛总结】皇位继承顺序（多叉树）， 最多可达成的换楼请求（数位dp）">
+<meta property="og:url" content="http://example.com/2020/10/08/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%9A%87%E4%BD%8D%E7%BB%A7%E6%89%BF%E9%A1%BA%E5%BA%8F%EF%BC%88%E5%A4%9A%E5%8F%89%E6%A0%91%EF%BC%89%EF%BC%8C%20%E6%9C%80%E5%A4%9A%E5%8F%AF%E8%BE%BE%E6%88%90%E7%9A%84%E6%8D%A2%E6%A5%BC%E8%AF%B7%E6%B1%82%EF%BC%88%E6%95%B0%E4%BD%8Ddp%EF%BC%89/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
-<meta property="og:description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
+<meta property="og:description" content="总结第208场周赛。一共两道题目。  1600 皇位继承顺序 M 1601.最多可达成的换楼请求 H">
 <meta property="og:locale">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201008194933384.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201008195058945.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201008195103505.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201008200644833.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201008200701251.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201008200759352.png#pic_center">
+<meta property="article:published_time" content="2020-10-08T12:16:32.000Z">
+<meta property="article:modified_time" content="2020-10-08T12:22:47.507Z">
 <meta property="article:author" content="Chenzuo Zhang">
-<meta property="article:tag" content="Java,Leetcode,工程师,代码,后端开发,大数据开发">
+<meta property="article:tag" content="动态规划">
+<meta property="article:tag" content="树">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20201008194933384.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
   
     <link rel="alternative" href="/atom.xml" title="小张的技术小木屋" type="application/atom+xml">
   
@@ -175,81 +185,223 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-【周赛总结】皇位继承顺序（多叉树）， 最多可达成的换楼请求（数位dp）" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-
-<a href="/2020/10/07/%E3%80%90JVM%E3%80%91%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/" class="archive-article-date">
-  	<time datetime="2020-10-07T09:09:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-07</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/10/07/%E3%80%90JVM%E3%80%91%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/">【JVM】字节码执行引擎</a>
+    <h1 class="article-title" itemprop="name">
+      【周赛总结】皇位继承顺序（多叉树）， 最多可达成的换楼请求（数位dp）
     </h1>
   
 
-        <div class="article-info info-on-right">
+        
+        
+        <!-- 不蒜子统计 -->
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
+
+<a href="/2020/10/08/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%9A%87%E4%BD%8D%E7%BB%A7%E6%89%BF%E9%A1%BA%E5%BA%8F%EF%BC%88%E5%A4%9A%E5%8F%89%E6%A0%91%EF%BC%89%EF%BC%8C%20%E6%9C%80%E5%A4%9A%E5%8F%AF%E8%BE%BE%E6%88%90%E7%9A%84%E6%8D%A2%E6%A5%BC%E8%AF%B7%E6%B1%82%EF%BC%88%E6%95%B0%E4%BD%8Ddp%EF%BC%89/" class="archive-article-date">
+  	<time datetime="2020-10-08T12:16:32.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-08</time>
+</a>
+        <!-- 需要添加的位置 -->
+        <!-- 开始添加字数统计-->
+        
+          <div style="margin-top:10px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">534字</span>
+      </span>
+    </span>
+
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">  阅读时长: </span>
+        <span class="post-count">2分</span>
+      </span>
+    </span>
+</div>
+
           
+        <!-- 添加完成 -->
+
+        
+
+  
+    <span class="archive-article-date">
+        阅读量 <span id="busuanzi_value_page_pv"></span>
+    </span>
+  
+
+      </header>
+    
+
+  <div class="article-entry" itemprop="articleBody">
+   
+
+	
+		<p>总结第208场周赛。一共两道题目。</p>
+<ul>
+<li><a href="#1600-%E7%9A%87%E4%BD%8D%E7%BB%A7%E6%89%BF%E9%A1%BA%E5%BA%8F-m">1600 皇位继承顺序 M</a></li>
+<li><a href="#1601%E6%9C%80%E5%A4%9A%E5%8F%AF%E8%BE%BE%E6%88%90%E7%9A%84%E6%8D%A2%E6%A5%BC%E8%AF%B7%E6%B1%82-h">1601.最多可达成的换楼请求 H</a><a id="more"></a>
+</li>
+</ul>
+<hr>
+<h1 id="1600-皇位继承顺序-M"><a href="#1600-皇位继承顺序-M" class="headerlink" title="1600 皇位继承顺序 M"></a>1600 皇位继承顺序 M</h1><p><img src="https://img-blog.csdnimg.cn/20201008194933384.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20201008195058945.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20201008195103505.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>是一道很巧妙的题目，其实变相考察了对于数据结构的理解，很多时候对于数据结构都是简单的调用。这道题仔细观察可以看出来，其实是一个树形结构。<strong>最后返回的结果其实是一颗二叉树的前序遍历</strong>。但是这里因为是多叉树，所以我们每个节点用一个List存储所有的人名。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ThroneInheritance</span> </span>&#123;</span><br><span class="line">    String kingName;</span><br><span class="line">    Map&lt;String, List&lt;String&gt;&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">    Set&lt;String&gt; set = <span class="keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ThroneInheritance</span><span class="params">(String kingName)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.kingName = kingName;</span><br><span class="line">        map.put(kingName, <span class="keyword">new</span> ArrayList&lt;&gt;());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">birth</span><span class="params">(String parentName, String childName)</span> </span>&#123;</span><br><span class="line">        map.get(parentName).add(childName);</span><br><span class="line">        map.put(childName, <span class="keyword">new</span> ArrayList&lt;&gt;());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">death</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        set.add(name);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;String&gt; <span class="title">getInheritanceOrder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; ans = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        dfs(ans, kingName);</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">dfs</span><span class="params">(List ans, String kingName)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!set.contains(kingName))ans.add(kingName);</span><br><span class="line">        <span class="keyword">for</span> (String name:map.get(kingName))&#123;</span><br><span class="line">            dfs(ans, name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<h1 id="1601-最多可达成的换楼请求-H"><a href="#1601-最多可达成的换楼请求-H" class="headerlink" title="1601.最多可达成的换楼请求 H"></a>1601.最多可达成的换楼请求 H</h1><p><img src="https://img-blog.csdnimg.cn/20201008200644833.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201008200701251.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20201008200759352.png#pic_center" alt="在这里插入图片描述"><br>这道题好像本质上可以转换为二分图的匹配问题，但是题目给的数据范围比较小，因此其实可以通过DP的方法解决。我们可以用通过数位DP的方法解决。</p>
+<p>因为我们只需要枚举出来所有能够出现的换房的组合，每次判断是否可以成功换房是很方便的，只要保证每个节点的出度等于入度即可。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">maximumRequests</span><span class="params">(<span class="keyword">int</span> n, <span class="keyword">int</span>[][] requests)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> m = requests.length;</span><br><span class="line">        <span class="keyword">int</span> N = <span class="number">1</span>&lt;&lt;m;</span><br><span class="line">        <span class="keyword">int</span> ans = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i&lt;N ;i++)&#123;</span><br><span class="line">            <span class="keyword">int</span>[] degree = <span class="keyword">new</span> <span class="keyword">int</span>[n];</span><br><span class="line">            <span class="keyword">int</span> tmp = <span class="number">0</span>;</span><br><span class="line">			<span class="comment">// 计算每个节点在当前组合下的出度和入度。</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j&lt;m; j++)&#123;</span><br><span class="line">                <span class="keyword">if</span> (((i&gt;&gt;j) &amp; <span class="number">1</span>) == <span class="number">1</span>)&#123;</span><br><span class="line">                    degree[requests[j][<span class="number">0</span>]] -= <span class="number">1</span>;</span><br><span class="line">                    degree[requests[j][<span class="number">1</span>]] += <span class="number">1</span>;</span><br><span class="line">                    tmp++;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span> tag = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j&lt;n;j++)&#123;</span><br><span class="line">                <span class="keyword">if</span> (degree[j] != <span class="number">0</span>)&#123;</span><br><span class="line">                    tag = <span class="number">1</span>;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (tag == <span class="number">0</span>) ans = Math.max(tmp, ans);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+	
+   
+
+
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JVM</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">动态规划</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">随笔</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">树</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/JAVA学习总结//" class="article-tag-list-link color4">JAVA学习总结</a>
+        			<a href="/categories/周赛总结//" class="article-tag-list-link color5">周赛总结</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/10/08/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%9A%87%E4%BD%8D%E7%BB%A7%E6%89%BF%E9%A1%BA%E5%BA%8F%EF%BC%88%E5%A4%9A%E5%8F%89%E6%A0%91%EF%BC%89%EF%BC%8C%20%E6%9C%80%E5%A4%9A%E5%8F%AF%E8%BE%BE%E6%88%90%E7%9A%84%E6%8D%A2%E6%A5%BC%E8%AF%B7%E6%B1%82%EF%BC%88%E6%95%B0%E4%BD%8Ddp%EF%BC%89/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2020/10/07/%E3%80%90JVM%E3%80%91%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">【JVM】字节码执行引擎</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -284,10 +436,10 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
-		isCategory: true,
+		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
 		root: "/",

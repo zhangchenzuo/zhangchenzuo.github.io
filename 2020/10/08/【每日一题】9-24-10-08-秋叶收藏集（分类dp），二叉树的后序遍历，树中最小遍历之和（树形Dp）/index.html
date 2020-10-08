@@ -6,18 +6,27 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Tag: 树 | 小张的技术小木屋</title>
+  <title>【每日一题】9.24-10.08 秋叶收藏集（分类dp），二叉树的后序遍历，树中最小遍历之和（树形Dp） | 小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
-<meta property="og:type" content="website">
-<meta property="og:title" content="小张的技术小木屋">
-<meta property="og:url" content="http://example.com/tags/%E6%A0%91/index.html">
+  <meta name="description" content="每日一题总结， 9.24-10.08.  LCP 19. 秋叶收藏集 834. 树中距离之和 145. 二叉树的后序遍历">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【每日一题】9.24-10.08 秋叶收藏集（分类dp），二叉树的后序遍历，树中最小遍历之和（树形Dp）">
+<meta property="og:url" content="http://example.com/2020/10/08/%E3%80%90%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98%E3%80%919-24-10-08-%E7%A7%8B%E5%8F%B6%E6%94%B6%E8%97%8F%E9%9B%86%EF%BC%88%E5%88%86%E7%B1%BBdp%EF%BC%89%EF%BC%8C%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86%EF%BC%8C%E6%A0%91%E4%B8%AD%E6%9C%80%E5%B0%8F%E9%81%8D%E5%8E%86%E4%B9%8B%E5%92%8C%EF%BC%88%E6%A0%91%E5%BD%A2Dp%EF%BC%89/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
-<meta property="og:description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
+<meta property="og:description" content="每日一题总结， 9.24-10.08.  LCP 19. 秋叶收藏集 834. 树中距离之和 145. 二叉树的后序遍历">
 <meta property="og:locale">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201008221208766.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201008221752167.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="article:published_time" content="2020-10-08T14:35:42.000Z">
+<meta property="article:modified_time" content="2020-10-08T14:38:46.769Z">
 <meta property="article:author" content="Chenzuo Zhang">
-<meta property="article:tag" content="Java,Leetcode,工程师,代码,后端开发,大数据开发">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="树">
+<meta property="article:tag" content="leetcode">
+<meta property="article:tag" content="树形dp">
+<meta property="article:tag" content="分类dp">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20201008221208766.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
   
     <link rel="alternative" href="/atom.xml" title="小张的技术小木屋" type="application/atom+xml">
   
@@ -175,38 +184,106 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-【每日一题】9-24-10-08-秋叶收藏集（分类dp），二叉树的后序遍历，树中最小遍历之和（树形Dp）" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      【每日一题】9.24-10.08 秋叶收藏集（分类dp），二叉树的后序遍历，树中最小遍历之和（树形Dp）
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
+
+        
+        
+        <!-- 不蒜子统计 -->
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
 
 <a href="/2020/10/08/%E3%80%90%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98%E3%80%919-24-10-08-%E7%A7%8B%E5%8F%B6%E6%94%B6%E8%97%8F%E9%9B%86%EF%BC%88%E5%88%86%E7%B1%BBdp%EF%BC%89%EF%BC%8C%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86%EF%BC%8C%E6%A0%91%E4%B8%AD%E6%9C%80%E5%B0%8F%E9%81%8D%E5%8E%86%E4%B9%8B%E5%92%8C%EF%BC%88%E6%A0%91%E5%BD%A2Dp%EF%BC%89/" class="archive-article-date">
   	<time datetime="2020-10-08T14:35:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-08</time>
 </a>
-        </div>
-    	 
+        <!-- 需要添加的位置 -->
+        <!-- 开始添加字数统计-->
+        
+          <div style="margin-top:10px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">904字</span>
+      </span>
+    </span>
+
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">  阅读时长: </span>
+        <span class="post-count">4分</span>
+      </span>
+    </span>
+</div>
+
+          
+        <!-- 添加完成 -->
+
+        
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/10/08/%E3%80%90%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98%E3%80%919-24-10-08-%E7%A7%8B%E5%8F%B6%E6%94%B6%E8%97%8F%E9%9B%86%EF%BC%88%E5%88%86%E7%B1%BBdp%EF%BC%89%EF%BC%8C%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86%EF%BC%8C%E6%A0%91%E4%B8%AD%E6%9C%80%E5%B0%8F%E9%81%8D%E5%8E%86%E4%B9%8B%E5%92%8C%EF%BC%88%E6%A0%91%E5%BD%A2Dp%EF%BC%89/">【每日一题】9.24-10.08 秋叶收藏集（分类dp），二叉树的后序遍历，树中最小遍历之和（树形Dp）</a>
-    </h1>
+    <span class="archive-article-date">
+        阅读量 <span id="busuanzi_value_page_pv"></span>
+    </span>
   
 
-        <div class="article-info info-on-right">
-          
+      </header>
+    
+
+  <div class="article-entry" itemprop="articleBody">
+   
+
+	
+		<p>每日一题总结， 9.24-10.08.</p>
+<ul>
+<li><a href="#lcp-19-%E7%A7%8B%E5%8F%B6%E6%94%B6%E8%97%8F%E9%9B%86">LCP 19. 秋叶收藏集</a></li>
+<li><a href="#834-%E6%A0%91%E4%B8%AD%E8%B7%9D%E7%A6%BB%E4%B9%8B%E5%92%8C">834. 树中距离之和</a></li>
+<li><a href="#145-%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86">145. 二叉树的后序遍历</a></li>
+</ul>
+<a id="more"></a>
+
+<hr>
+<h1 id="LCP-19-秋叶收藏集"><a href="#LCP-19-秋叶收藏集" class="headerlink" title="LCP 19. 秋叶收藏集"></a>LCP 19. 秋叶收藏集</h1><p><img src="https://img-blog.csdnimg.cn/20201008221208766.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>有点分情况讨论Dp的意思，对于dp问题我们还是需要分两步分析，首先分析子问题是什么。我们最终的结果是长度为<code>n</code>的树叶中，得到上下上的形式。这个问题可以变为子问题。在长度为<code>n-1</code>的树叶集得到 1. 上下上/上下，这样最后一个只需要保证变为上；这样我们考虑第<code>n-1</code>片叶子，如果<code>n-1</code>是上下上，则<code>n-2</code>需要是 上下或者上下上；如果<code>n-1</code>是上下，则<code>n-2</code>需要是 上上或者上下。</p>
+<p>因此实际上由三个大的状态：上，上下，上下上。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">minimumOperations</span><span class="params">(String leaves)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> n = leaves.length();</span><br><span class="line">        <span class="keyword">int</span>[] dp1 = <span class="keyword">new</span> <span class="keyword">int</span>[n];</span><br><span class="line">        <span class="keyword">int</span>[] dp2 = <span class="keyword">new</span> <span class="keyword">int</span>[n];</span><br><span class="line">        <span class="keyword">int</span>[] dp3 = <span class="keyword">new</span> <span class="keyword">int</span>[n];</span><br><span class="line">        dp2[<span class="number">0</span>] = <span class="number">2</span>; <span class="comment">// 设置的大一些，防止出现问题</span></span><br><span class="line">        dp3[<span class="number">0</span>] = <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> (leaves.charAt(<span class="number">0</span>) == <span class="string">&#x27;y&#x27;</span>)dp1[<span class="number">0</span>] = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">else</span> dp1[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i&lt;n; i++)&#123;</span><br><span class="line">            <span class="keyword">if</span> (leaves.charAt(i) == <span class="string">&#x27;y&#x27;</span>) &#123;</span><br><span class="line">                dp1[i] = dp1[i-<span class="number">1</span>]+<span class="number">1</span>;</span><br><span class="line">                dp2[i] = Math.min(dp2[i-<span class="number">1</span>], dp1[i-<span class="number">1</span>]);</span><br><span class="line">                dp3[i] = Math.min(dp3[i-<span class="number">1</span>], dp2[i-<span class="number">1</span>])+<span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                dp1[i] = dp1[i-<span class="number">1</span>];  </span><br><span class="line">                dp2[i] = Math.min(dp2[i-<span class="number">1</span>], dp1[i-<span class="number">1</span>])+<span class="number">1</span>;</span><br><span class="line">                dp3[i] = Math.min(dp3[i-<span class="number">1</span>], dp2[i-<span class="number">1</span>]);   </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dp3[n-<span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="834-树中距离之和"><a href="#834-树中距离之和" class="headerlink" title="834. 树中距离之和"></a>834. 树中距离之和</h1><p><img src="https://img-blog.csdnimg.cn/20201008221752167.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>基本思路是树形dp，并且很巧妙的用了换根的方法，降低了复杂度。<br>有一个很好的<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/sum-of-distances-in-tree/solution/shou-hua-tu-jie-shu-zhong-ju-chi-zhi-he-shu-xing-d/">题解</a>。</p>
+<p>我理解的思路就是，首先不可避免的需要遍历一遍树也就是dfs完成，这样可以得到根节点的边数量，然后再遍历一遍各个节点，计算出基于已知根节点情况下，自己的距离之和。</p>
+<blockquote>
+<p>每个大根节点的边数量 = 根节点连接的所有子节点数量+所有子节点作为子树的大根的距离之和。<br>每个子节点的距离之和 = 当前节点作为子树的大根节点的距离之和 +（父节点 - 当前节点的贡献）</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 树形Dp+换根的思路</span></span><br><span class="line">    <span class="keyword">int</span>[] ans;</span><br><span class="line">    <span class="keyword">int</span>[] sz;</span><br><span class="line">    <span class="keyword">int</span>[] dp;</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; graph;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] sumOfDistancesInTree(<span class="keyword">int</span> N, <span class="keyword">int</span>[][] edges) &#123;</span><br><span class="line">        ans = <span class="keyword">new</span> <span class="keyword">int</span>[N];</span><br><span class="line">        <span class="comment">// 连接的子树中所有子节点的数量</span></span><br><span class="line">        sz = <span class="keyword">new</span> <span class="keyword">int</span>[N];</span><br><span class="line">        <span class="comment">// 作为子树的大根的距离之和</span></span><br><span class="line">        dp = <span class="keyword">new</span> <span class="keyword">int</span>[N];</span><br><span class="line">        graph = <span class="keyword">new</span> ArrayList&lt;List&lt;Integer&gt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; N; ++i) &#123;</span><br><span class="line">            graph.add(<span class="keyword">new</span> ArrayList&lt;Integer&gt;());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span>[] edge: edges) &#123;</span><br><span class="line">            <span class="keyword">int</span> u = edge[<span class="number">0</span>], v = edge[<span class="number">1</span>];</span><br><span class="line">            graph.get(u).add(v);</span><br><span class="line">            graph.get(v).add(u);</span><br><span class="line">        &#125;</span><br><span class="line">        dfs(<span class="number">0</span>, -<span class="number">1</span>);</span><br><span class="line">        dfs2(<span class="number">0</span>, -<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">dfs</span><span class="params">(<span class="keyword">int</span> u, <span class="keyword">int</span> f)</span> </span>&#123;</span><br><span class="line">        sz[u] = <span class="number">1</span>;</span><br><span class="line">        dp[u] = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> v: graph.get(u)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (v == f) &#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            dfs(v, u);</span><br><span class="line">            dp[u] += dp[v] + sz[v];</span><br><span class="line">            sz[u] += sz[v];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">dfs2</span><span class="params">(<span class="keyword">int</span> u, <span class="keyword">int</span> f)</span> </span>&#123;</span><br><span class="line">        ans[u] = dp[u];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> v: graph.get(u)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (v == f) &#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">int</span> pu = dp[u], pv = dp[v];</span><br><span class="line">            <span class="keyword">int</span> su = sz[u], sv = sz[v];</span><br><span class="line"></span><br><span class="line">            dp[u] -= dp[v] + sz[v];</span><br><span class="line">            sz[u] -= sz[v];</span><br><span class="line">            dp[v] += dp[u] + sz[u];</span><br><span class="line">            sz[v] += sz[u];</span><br><span class="line"></span><br><span class="line">            dfs2(v, u);</span><br><span class="line"></span><br><span class="line">            dp[u] = pu;</span><br><span class="line">            dp[v] = pv;</span><br><span class="line">            sz[u] = su;</span><br><span class="line">            sz[v] = sv;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="145-二叉树的后序遍历"><a href="#145-二叉树的后序遍历" class="headerlink" title="145. 二叉树的后序遍历"></a>145. 二叉树的后序遍历</h1><p>递归的方法很常见了，这里还是记录下递归方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 迭代方法：</span></span><br><span class="line"><span class="comment"># 不用反转的</span></span><br><span class="line"><span class="comment"># queue的元素一定是下一个元素的父节点</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">postorderTraversal</span>(<span class="params">self, root</span>):</span></span><br><span class="line">        <span class="comment">#&#x27;&#x27;&#x27;</span></span><br><span class="line">        ans, queue, cur = [], [], root</span><br><span class="line">        <span class="keyword">while</span> queue <span class="keyword">or</span> cur:</span><br><span class="line">            <span class="keyword">while</span> cur:</span><br><span class="line">                queue.append(cur)</span><br><span class="line">                <span class="keyword">if</span> cur.left:</span><br><span class="line">                    cur = cur.left</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    cur = cur.right</span><br><span class="line">            cur = queue.pop()</span><br><span class="line">            ans.append(cur.val)</span><br><span class="line">            <span class="keyword">if</span> queue <span class="keyword">and</span> queue[<span class="number">-1</span>].left == cur:</span><br><span class="line">                cur = queue[<span class="number">-1</span>].right</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                cur = <span class="literal">None</span></span><br><span class="line">        <span class="keyword">return</span> ans</span><br></pre></td></tr></table></figure>
+
+
+	
+   
+
+
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -234,7 +311,7 @@
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -247,80 +324,104 @@
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/10/08/%E3%80%90%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98%E3%80%919-24-10-08-%E7%A7%8B%E5%8F%B6%E6%94%B6%E8%97%8F%E9%9B%86%EF%BC%88%E5%88%86%E7%B1%BBdp%EF%BC%89%EF%BC%8C%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86%EF%BC%8C%E6%A0%91%E4%B8%AD%E6%9C%80%E5%B0%8F%E9%81%8D%E5%8E%86%E4%B9%8B%E5%92%8C%EF%BC%88%E6%A0%91%E5%BD%A2Dp%EF%BC%89/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
 
-<a href="/2020/10/08/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%9A%87%E4%BD%8D%E7%BB%A7%E6%89%BF%E9%A1%BA%E5%BA%8F%EF%BC%88%E5%A4%9A%E5%8F%89%E6%A0%91%EF%BC%89%EF%BC%8C%20%E6%9C%80%E5%A4%9A%E5%8F%AF%E8%BE%BE%E6%88%90%E7%9A%84%E6%8D%A2%E6%A5%BC%E8%AF%B7%E6%B1%82%EF%BC%88%E6%95%B0%E4%BD%8Ddp%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2020-10-08T12:16:32.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-08</time>
-</a>
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2020/10/08/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97%E4%B8%8E%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88%EF%BC%8C%E6%8E%92%E5%BA%8F%E7%AD%89/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">【周赛总结】优先队列与有序集合，排序等</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/10/08/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%9A%87%E4%BD%8D%E7%BB%A7%E6%89%BF%E9%A1%BA%E5%BA%8F%EF%BC%88%E5%A4%9A%E5%8F%89%E6%A0%91%EF%BC%89%EF%BC%8C%20%E6%9C%80%E5%A4%9A%E5%8F%AF%E8%BE%BE%E6%88%90%E7%9A%84%E6%8D%A2%E6%A5%BC%E8%AF%B7%E6%B1%82%EF%BC%88%E6%95%B0%E4%BD%8Ddp%EF%BC%89/">【周赛总结】皇位继承顺序（多叉树）， 最多可达成的换楼请求（数位dp）</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">动态规划</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">树</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">leetcode</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/周赛总结//" class="article-tag-list-link color5">周赛总结</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+
   
   
-    </div></section>
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -355,9 +456,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,

@@ -3,48 +3,61 @@
   position: relative;
   min-height: 70vh;
 }
+
 .category-all-page h2 {
   margin: 20px 0;
 }
+
 .category-all-page .category-all-title {
   text-align: center;
 }
+
 .category-all-page .category-all {
   margin-top: 20px;
 }
+
 .category-all-page .category-list {
   margin: 0;
   padding: 0;
   list-style: none;
 }
+
 .category-all-page .category-list-item-list-item {
   margin: 10px 15px;
 }
+
 .category-all-page .category-list-item-list-count {
   color: $grey;
 }
+
 .category-all-page .category-list-item-list-count:before {
   display: inline;
   content: " (";
 }
+
 .category-all-page .category-list-item-list-count:after {
   display: inline;
   content: ") ";
 }
+
 .category-all-page .category-list-item {
   margin: 10px 10px;
 }
+
 .category-all-page .category-list-count {
   color: $grey;
 }
+
 .category-all-page .category-list-count:before {
   display: inline;
   content: " (";
 }
+
 .category-all-page .category-list-count:after {
   display: inline;
   content: ") ";
 }
+
 .category-all-page .category-list-child {
   padding-left: 10px;
 } */
@@ -418,9 +431,7 @@ body {
   font-family: Helvetica Neue, Helvetica, STHeiTi, Arial, sans-serif;
   line-height: 1.5;
   color: #333;
-  background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), 
-  url(./img/backiee1.jpg);
-  /* background-color: #fff; */
+  background-color: #fff;
   min-height: 100%
 }
 
@@ -967,7 +978,7 @@ html {
   position: absolute;
   right: 0;
   min-height: 100%;
-  /* background: #eaeaea; */
+  background: #eaeaea;
   left: 300px;
   width: auto
 }
@@ -982,9 +993,7 @@ html {
 }
 
 .left-col {
-  /* background: #fff; */
-  background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
-  url('http://bucket836.oss-cn-shenzhen.aliyuncs.com/wallpaper/381535373.jpeg') no-repeat 0% 20%/ cover;
+  background: #fff;
   width: 300px;
   position: fixed;
   opacity: 1;
@@ -1051,9 +1060,13 @@ html {
 }
 
 .left-col #header .header-menu li a {
-  font-size: 14px;
+  /* font-size: 14px;
+  font-weight: 100
+  min-width: 300px */
   min-width: 300px;
-  font-weight: bold;
+	font-size: 16px;
+	font-weight: bold
+  
 }
 
 .left-col #header .header-smart-menu {
@@ -1102,9 +1115,9 @@ html {
 .left-col #header .header-author {
   text-align: center;
   margin: .67em 0;
-  font-family: Roboto, serif;
+  /* font-family: Roboto, serif; */
+  color: #086ef6;
   font-family: KaiTi;
-  font-weight: bold;
   font-size: 30px;
   transition: .3s
 }
@@ -2244,8 +2257,8 @@ pre .id {
   border: 1px solid #ddd;
   border-top: 1px solid #fff;
   border-bottom: 1px solid #fff;
-  background: rgba(255,255,255,.5);
   /* background: #fff; */
+  background: rgba(255,255,255,.5);
   transition: all .2s ease-in
 }
 
@@ -3659,6 +3672,8 @@ pre .id {
     text-align: center;
     margin: .67em 0;
     font-family: Roboto, serif;
+    color: #086ef6;
+    /* font-family: KaiTi; */
     font-size: 30px;
     transition: .3s
   }
@@ -3711,5 +3726,3 @@ pre .id {
 .code-wrapper:hover .btn-copy {
   opacity: 1;
 }
-
-

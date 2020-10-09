@@ -418,9 +418,7 @@ body {
   font-family: Helvetica Neue, Helvetica, STHeiTi, Arial, sans-serif;
   line-height: 1.5;
   color: #333;
-  background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), 
-  url(./img/backiee1.jpg);
-  /* background-color: #fff; */
+  background-color: #fff;
   min-height: 100%
 }
 
@@ -967,7 +965,7 @@ html {
   position: absolute;
   right: 0;
   min-height: 100%;
-  /* background: #eaeaea; */
+  background: #eaeaea;
   left: 300px;
   width: auto
 }
@@ -982,9 +980,7 @@ html {
 }
 
 .left-col {
-  /* background: #fff; */
-  background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
-  url('http://bucket836.oss-cn-shenzhen.aliyuncs.com/wallpaper/381535373.jpeg') no-repeat 0% 20%/ cover;
+  background: #fff;
   width: 300px;
   position: fixed;
   opacity: 1;
@@ -1052,8 +1048,7 @@ html {
 
 .left-col #header .header-menu li a {
   font-size: 14px;
-  min-width: 300px;
-  font-weight: bold;
+  min-width: 300px
 }
 
 .left-col #header .header-smart-menu {
@@ -1103,8 +1098,6 @@ html {
   text-align: center;
   margin: .67em 0;
   font-family: Roboto, serif;
-  font-family: KaiTi;
-  font-weight: bold;
   font-size: 30px;
   transition: .3s
 }
@@ -2244,8 +2237,7 @@ pre .id {
   border: 1px solid #ddd;
   border-top: 1px solid #fff;
   border-bottom: 1px solid #fff;
-  background: rgba(255,255,255,.5);
-  /* background: #fff; */
+  background: #fff;
   transition: all .2s ease-in
 }
 

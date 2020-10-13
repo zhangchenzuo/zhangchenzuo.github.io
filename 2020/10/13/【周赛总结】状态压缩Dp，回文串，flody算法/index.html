@@ -8,20 +8,31 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>分类 | 小张的技术小木屋</title>
+  <title>【周赛总结】状态压缩Dp，回文串，flody算法 | 小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
-<meta property="og:type" content="website">
-<meta property="og:title" content="分类">
-<meta property="og:url" content="http://example.com/categories/index.html">
+  <meta name="description" content="总结第210场周赛。  1617. 统计子树中城市之间最大距离 1616. 分割两个字符串得到回文串">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【周赛总结】状态压缩Dp，回文串，flody算法">
+<meta property="og:url" content="http://example.com/2020/10/13/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%8A%B6%E6%80%81%E5%8E%8B%E7%BC%A9Dp%EF%BC%8C%E5%9B%9E%E6%96%87%E4%B8%B2%EF%BC%8Cflody%E7%AE%97%E6%B3%95/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
-<meta property="og:description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
+<meta property="og:description" content="总结第210场周赛。  1617. 统计子树中城市之间最大距离 1616. 分割两个字符串得到回文串">
 <meta property="og:locale">
-<meta property="article:published_time" content="2020-10-06T14:11:41.000Z">
-<meta property="article:modified_time" content="2020-10-10T11:56:53.124Z">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2020101222273495.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201012222742836.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201012222753974.png#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201013102640193.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201013103411917.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="article:published_time" content="2020-10-13T02:42:09.000Z">
+<meta property="article:modified_time" content="2020-10-13T02:46:00.207Z">
 <meta property="article:author" content="Chenzuo Zhang">
-<meta property="article:tag" content="Java,Leetcode,工程师,代码,后端开发,大数据开发">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="字符串">
+<meta property="article:tag" content="leetcode">
+<meta property="article:tag" content="回文串">
+<meta property="article:tag" content="状态压缩dp">
+<meta property="article:tag" content="图">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/2020101222273495.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
   
     <link rel="alternative" href="/atom.xml" title="小张的技术小木屋" type="application/atom+xml">
   
@@ -194,14 +205,14 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="page-" class="article article-type-page " itemscope itemprop="blogPost">
+            <article id="post-【周赛总结】状态压缩Dp，回文串，flody算法" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      分类
+      【周赛总结】状态压缩Dp，回文串，flody算法
     </h1>
   
 
@@ -213,8 +224,8 @@
         </span>
 
 
-<a href="/categories/index.html" class="archive-article-date">
-  	<time datetime="2020-10-06T14:11:41.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-06</time>
+<a href="/2020/10/13/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%8A%B6%E6%80%81%E5%8E%8B%E7%BC%A9Dp%EF%BC%8C%E5%9B%9E%E6%96%87%E4%B8%B2%EF%BC%8Cflody%E7%AE%97%E6%B3%95/" class="archive-article-date">
+  	<time datetime="2020-10-13T02:42:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-13</time>
 </a>
         <!-- 需要添加的位置 -->
         <!-- 开始添加字数统计-->
@@ -224,7 +235,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">0字</span>
+        <span class="post-count">1k字</span>
       </span>
     </span>
 
@@ -233,7 +244,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-hourglass-half"></i>
         <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">1分</span>
+        <span class="post-count">4分</span>
       </span>
     </span>
 </div>
@@ -255,18 +266,31 @@
   <div class="article-entry" itemprop="articleBody">
    
 
-    <div class="category-all-page">
-	<div class="category-all-title">
-	counter.categories
-	</div>
 	
-	<div class="category-all">
-	<ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JAVA%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/">JAVA学习总结</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93/">周赛总结</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/">每日一题</a><span class="category-list-count">1</span></li></ul>
-	</div>
-	
-    </div>
+		<p>总结第210场周赛。</p>
+<ul>
+<li><a href="#1617-%E7%BB%9F%E8%AE%A1%E5%AD%90%E6%A0%91%E4%B8%AD%E5%9F%8E%E5%B8%82%E4%B9%8B%E9%97%B4%E6%9C%80%E5%A4%A7%E8%B7%9D%E7%A6%BB">1617. 统计子树中城市之间最大距离</a></li>
+<li><a href="#1616-%E5%88%86%E5%89%B2%E4%B8%A4%E4%B8%AA%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%BE%97%E5%88%B0%E5%9B%9E%E6%96%87%E4%B8%B2">1616. 分割两个字符串得到回文串</a></li>
+</ul>
+<a id="more"></a>
+<hr>
+<h1 id="1617-统计子树中城市之间最大距离"><a href="#1617-统计子树中城市之间最大距离" class="headerlink" title="1617. 统计子树中城市之间最大距离"></a>1617. 统计子树中城市之间最大距离</h1><p><img src="https://img-blog.csdnimg.cn/2020101222273495.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20201012222742836.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20201012222753974.png#pic_center" alt="在这里插入图片描述"></p>
+<p>题目的难点我觉着有两个，一个是如何找到不一样的子树，一个是如何计算子树的距离。</p>
+<p>对于子树中任意两个点的距离，可以考虑flody算法，实现三重循环的方法实现。<strong>这里需要特别注意，因为涉及到加法，因此我们不能把最大值设为<code>MAX_VALUE</code>这样在加法中会爆整数。</strong></p>
+<p>其次对于寻找不一样的子树，其实子树就是把不同的节点组织在一起的。看到数据不是很大，其实可以想到用状态压缩DP的思路解决问题。定义<code>dp[i]</code>表示i的二进制其实是对应节点组成的树的距离。需要考虑，dp的初始其实就是实际连接的两个节点组成的子树。这个子树肯定是连通的。同时我们注意在每次枚举中，子树的大小是只增加不减小的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] countSubgraphsForEachDiameter(<span class="keyword">int</span> n, <span class="keyword">int</span>[][] edges) &#123;</span><br><span class="line">        <span class="keyword">int</span> N = <span class="number">1</span>&lt;&lt;n;</span><br><span class="line">        <span class="keyword">int</span>[][] dis = <span class="keyword">new</span> <span class="keyword">int</span>[n][n];</span><br><span class="line">        <span class="keyword">int</span>[] dp = <span class="keyword">new</span> <span class="keyword">int</span>[N];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i&lt;n;i++)&#123;</span><br><span class="line">            <span class="comment">// 这里不能是MAX_VALUE,因为会涉及加法。</span></span><br><span class="line">            Arrays.fill(dis[i], Integer.MAX_VALUE/<span class="number">2</span>);</span><br><span class="line">            <span class="comment">//dis[i][i] = 0;</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span>[] e:edges)&#123;</span><br><span class="line">            <span class="keyword">int</span> a = e[<span class="number">0</span>]-<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">int</span> b = e[<span class="number">1</span>]-<span class="number">1</span>;</span><br><span class="line">            dis[b][a] = <span class="number">1</span>;</span><br><span class="line">            dis[a][b] = <span class="number">1</span>;</span><br><span class="line">            <span class="comment">// 构建初始的子树</span></span><br><span class="line">            dp[(<span class="number">1</span>&lt;&lt;a)+(<span class="number">1</span>&lt;&lt;b)] = <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Foldy 算法</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> k = <span class="number">0</span>; k&lt;n;k++)&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i&lt;n;i++)&#123;</span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>; j&lt;n;j++)&#123;</span><br><span class="line">                    <span class="comment">//if(dis[i][k]==Integer.MAX_VALUE || dis[k][j]==Integer.MAX_VALUE) continue;</span></span><br><span class="line">                    dis[i][j] = Math.min(dis[i][j], dis[i][k]+dis[k][j]); </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">		<span class="comment">// 状态压缩的枚举</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i&lt;N; i++)&#123;</span><br><span class="line">        	<span class="comment">// 这表示当前的子树都不是连通的。</span></span><br><span class="line">            <span class="keyword">if</span> (dp[i] == <span class="number">0</span>) <span class="keyword">continue</span>;</span><br><span class="line">            <span class="comment">// 枚举需要新添加进子树的点j</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j&lt;n;j++)&#123;</span><br><span class="line">                <span class="comment">// 如果已经在树中或者已经被分析过的树直接跳过</span></span><br><span class="line">                <span class="comment">// 这里不可以写为(i&amp;(1&lt;&lt;j) == 1) 错误写法</span></span><br><span class="line">                <span class="keyword">if</span> ((i&amp;(<span class="number">1</span>&lt;&lt;j)) != <span class="number">0</span> || dp[i+(<span class="number">1</span>&lt;&lt;j)] != <span class="number">0</span>) <span class="keyword">continue</span>;</span><br><span class="line">                <span class="comment">// 要求：树中需要有节点与j直接连通</span></span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> k = <span class="number">0</span>; k&lt;n; k++)&#123;</span><br><span class="line">                    <span class="comment">// 寻找树中存在的节点</span></span><br><span class="line">                    <span class="keyword">if</span> ((i&amp;(<span class="number">1</span>&lt;&lt;k)) == <span class="number">0</span>) <span class="keyword">continue</span>;</span><br><span class="line">                    <span class="keyword">if</span> (dis[k][j] == <span class="number">1</span>)&#123;</span><br><span class="line">                        dp[i+(<span class="number">1</span>&lt;&lt;j)] = dp[i];</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (dp[i+(<span class="number">1</span>&lt;&lt;j)] == <span class="number">0</span>) <span class="keyword">continue</span>;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> p = <span class="number">0</span>; p&lt;n; p++)&#123;</span><br><span class="line">                    <span class="keyword">if</span> ((i&amp;(<span class="number">1</span>&lt;&lt;p)) != <span class="number">0</span>)&#123;</span><br><span class="line">                    <span class="comment">// 更新树的距离，树中每个点到j的的最小距离</span></span><br><span class="line">                        dp[i + (<span class="number">1</span>&lt;&lt;j)] = Math.max(dp[i +(<span class="number">1</span>&lt;&lt;j)], dis[j][p]);  </span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;         </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span>[] ans = <span class="keyword">new</span> <span class="keyword">int</span>[n-<span class="number">1</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i&lt;N; i++)&#123;</span><br><span class="line">            <span class="keyword">if</span> (dp[i]!= <span class="number">0</span>) ans[dp[i]-<span class="number">1</span>]++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    
+<hr>
+<h1 id="1616-分割两个字符串得到回文串"><a href="#1616-分割两个字符串得到回文串" class="headerlink" title="1616. 分割两个字符串得到回文串"></a>1616. 分割两个字符串得到回文串</h1><p><img src="https://img-blog.csdnimg.cn/20201013102640193.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>字符串问题，还是很难的。这里涉及到了如何低复杂度实现回文串的问题。之前我想到的思路是与回文串<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/palindrome-pairs/">添加链接描述</a>的题目类似的，利用集合实现降低复杂度的操作。但是这个题目的特点在，前后拼接是有要求的，也就是其实我们知道最后的长度。</p>
+<p>因此操作思路是，首先从中间开始匹配，要求是回文串，在两个字串中都进行这个操作，找到一个最大长度的回文串就可以。当出现不匹配之后，可以有一个容错，跨字符串进行匹配。如果可以完全的匹配，最后<code>left = -1</code>.</p>
+<p><img src="https://img-blog.csdnimg.cn/20201013103411917.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">checkPalindromeFormation</span><span class="params">(String a, String b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> left = a.length()/<span class="number">2</span>-<span class="number">1</span>;</span><br><span class="line">        left = Math.min(check(a,a,left), check(b,b,left));</span><br><span class="line">        left = Math.min(check(a,b, left), check(b,a,left));</span><br><span class="line">        <span class="keyword">return</span> left == -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">check</span><span class="params">(String a, String b, <span class="keyword">int</span> left)</span></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> right = a.length()-left-<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span> (left&gt;=<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">if</span> (a.charAt(left) != b.charAt(right)) <span class="keyword">break</span>;</span><br><span class="line">            left--;</span><br><span class="line">            right++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> left;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+	
+   
 
 
 
@@ -275,7 +299,49 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">字符串</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">leetcode</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">回文串</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">状态压缩dp</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">图</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/周赛总结//" class="article-tag-list-link color5">周赛总结</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
 
       
 
@@ -325,7 +391,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/categories/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/10/13/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%8A%B6%E6%80%81%E5%8E%8B%E7%BC%A9Dp%EF%BC%8C%E5%9B%9E%E6%96%87%E4%B8%B2%EF%BC%8Cflody%E7%AE%97%E6%B3%95/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -337,6 +403,16 @@
 </article>
 
   
+<nav id="article-nav">
+  
+  
+    <a href="/2020/10/08/%E3%80%90%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98%E3%80%919-24-10-08-%E7%A7%8B%E5%8F%B6%E6%94%B6%E8%97%8F%E9%9B%86%EF%BC%88%E5%88%86%E7%B1%BBdp%EF%BC%89%EF%BC%8C%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86%EF%BC%8C%E6%A0%91%E4%B8%AD%E6%9C%80%E5%B0%8F%E9%81%8D%E5%8E%86%E4%B9%8B%E5%92%8C%EF%BC%88%E6%A0%91%E5%BD%A2Dp%EF%BC%89/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">【每日一题】9.24-10.08 秋叶收藏集（分类dp），二叉树的后序遍历，树中最小遍历之和（树形Dp）</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -355,6 +431,16 @@
 </aside>
 
 
+
+  
+  
+  
+
+  
+
+  
+
+  
 
 
           </div>
@@ -389,7 +475,7 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

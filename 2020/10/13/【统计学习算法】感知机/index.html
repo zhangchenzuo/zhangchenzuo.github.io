@@ -8,20 +8,33 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>分类 | 小张的技术小木屋</title>
+  <title>【统计学习算法】Part1， 前七章的学习笔记 | 小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
-<meta property="og:type" content="website">
-<meta property="og:title" content="分类">
-<meta property="og:url" content="http://example.com/categories/index.html">
+  <meta name="description" content="本文主要整理了在阅读李航的《统计学习方法》中的学习笔记，阅读过程中参考了很多前人的总结和分析，收获良多。在此无法一一感谢，很多笔记都是拾人牙慧，如有侵权，请告知我将进行修改。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【统计学习算法】Part1， 前七章的学习笔记">
+<meta property="og:url" content="http://example.com/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91%E6%84%9F%E7%9F%A5%E6%9C%BA/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
-<meta property="og:description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
+<meta property="og:description" content="本文主要整理了在阅读李航的《统计学习方法》中的学习笔记，阅读过程中参考了很多前人的总结和分析，收获良多。在此无法一一感谢，很多笔记都是拾人牙慧，如有侵权，请告知我将进行修改。">
 <meta property="og:locale">
-<meta property="article:published_time" content="2020-10-06T14:11:41.000Z">
-<meta property="article:modified_time" content="2020-10-10T11:56:53.124Z">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200506210034282.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200506210457142.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200506213843176.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200506214217813.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2020050621462277.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200506214638333.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200506215000719.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200506215540260.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200506215606512.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200506223447193.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200506222159506.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200507224211467.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="article:published_time" content="2020-10-13T08:53:52.000Z">
+<meta property="article:modified_time" content="2020-10-13T09:13:09.953Z">
 <meta property="article:author" content="Chenzuo Zhang">
-<meta property="article:tag" content="Java,Leetcode,工程师,代码,后端开发,大数据开发">
+<meta property="article:tag" content="机器学习">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200506210034282.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
   
     <link rel="alternative" href="/atom.xml" title="小张的技术小木屋" type="application/atom+xml">
   
@@ -194,14 +207,14 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="page-" class="article article-type-page " itemscope itemprop="blogPost">
+            <article id="post-【统计学习算法】感知机" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      分类
+      【统计学习算法】Part1， 前七章的学习笔记
     </h1>
   
 
@@ -213,8 +226,8 @@
         </span>
 
 
-<a href="/categories/index.html" class="archive-article-date">
-  	<time datetime="2020-10-06T14:11:41.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-06</time>
+<a href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91%E6%84%9F%E7%9F%A5%E6%9C%BA/" class="archive-article-date">
+  	<time datetime="2020-10-13T08:53:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-13</time>
 </a>
         <!-- 需要添加的位置 -->
         <!-- 开始添加字数统计-->
@@ -224,7 +237,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">0字</span>
+        <span class="post-count">4.1k字</span>
       </span>
     </span>
 
@@ -233,7 +246,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-hourglass-half"></i>
         <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">1分</span>
+        <span class="post-count">14分</span>
       </span>
     </span>
 </div>
@@ -255,18 +268,163 @@
   <div class="article-entry" itemprop="articleBody">
    
 
-    <div class="category-all-page">
-	<div class="category-all-title">
-	counter.categories
-	</div>
 	
-	<div class="category-all">
-	<ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JAVA%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/">JAVA学习总结</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93/">周赛总结</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/">每日一题</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95/">统计学习算法</a><span class="category-list-count">2</span></li></ul>
-	</div>
-	
-    </div>
+		<p>本文主要整理了在阅读李航的《统计学习方法》中的学习笔记，阅读过程中参考了很多前人的总结和分析，收获良多。在此无法一一感谢，很多笔记都是拾人牙慧，如有侵权，请告知我将进行修改。</p>
+<a id="more"></a>
+<ul>
+<li><a href="#%E6%84%9F%E7%9F%A5%E6%9C%BA">感知机</a><ul>
+<li><a href="#%E4%B8%80%E7%AE%80%E4%BB%8B">一、简介</a></li>
+<li><a href="#%E4%BA%8C%E4%BC%98%E7%BC%BA%E7%82%B9">二、优缺点</a></li>
+</ul>
+</li>
+<li><a href="#knn%E7%AE%97%E6%B3%95">KNN算法</a><ul>
+<li><a href="#%E4%B8%80%E7%AE%80%E4%BB%8B-1">一、简介</a></li>
+<li><a href="#%E4%BA%8C%E4%BC%98%E7%BC%BA%E7%82%B9-1">二、优缺点</a></li>
+<li><a href="#%E4%B8%89%E7%94%A8%E4%BA%8E%E5%9B%9E%E5%BD%92">三、用于回归</a></li>
+</ul>
+</li>
+<li><a href="#%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E7%AE%97%E6%B3%95">朴素贝叶斯算法</a><ul>
+<li><a href="#%E4%B8%80%E4%BC%98%E7%82%B9">一、优点</a></li>
+<li><a href="#%E4%BA%8C%E7%BC%BA%E7%82%B9">二、缺点</a></li>
+</ul>
+</li>
+<li><a href="#%E5%86%B3%E7%AD%96%E6%A0%91">决策树</a><ul>
+<li><a href="#%E4%B8%80%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9">一、特征选择</a></li>
+<li><a href="#%E4%BA%8C%E5%89%AA%E6%9E%9D">二、剪枝</a></li>
+<li><a href="#%E4%B8%89%E8%BF%9E%E7%BB%AD%E5%80%BC%E5%92%8C%E7%BC%BA%E5%A4%B1%E5%80%BC%E7%9A%84%E5%A4%84%E7%90%86">三、连续值和缺失值的处理。</a></li>
+</ul>
+</li>
+<li><a href="#%E9%80%BB%E8%BE%91%E6%96%AF%E8%92%82%E5%9B%9E%E5%BD%92">逻辑斯蒂回归</a><ul>
+<li><a href="#%E4%B8%80%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5">一、基础概念</a></li>
+<li><a href="#%E4%BA%8C%E5%AF%B9%E6%95%B0%E5%87%A0%E7%8E%87log-odds">二、对数几率(log odds)</a></li>
+</ul>
+</li>
+<li><a href="#%E6%9C%80%E5%A4%A7%E7%86%B5%E5%8E%9F%E7%90%86">最大熵原理</a><ul>
+<li><a href="#%E4%B8%80%E6%9C%80%E5%A4%A7%E7%86%B5%E6%A8%A1%E5%9E%8B">一、最大熵模型</a></li>
+<li><a href="#%E4%BA%8C%E6%9C%80%E5%A4%A7%E7%86%B5%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%AD%A6%E4%B9%A0">二、最大熵模型的学习</a></li>
+<li><a href="#%E4%B8%89%E6%9C%80%E5%A4%A7%E5%8C%96lw%E4%B8%8E%E6%9C%80%E5%A4%A7%E4%BC%BC%E7%84%B6%E4%BC%B0%E8%AE%A1%E6%98%AF%E7%AD%89%E4%BB%B7%E7%9A%84">三、最大化$L(w)$与最大似然估计是等价的</a></li>
+<li><a href="#%E5%9B%9B%E6%9C%80%E5%A4%A7%E7%86%B5%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%80%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95">四、最大熵模型的最优化算法</a></li>
+<li><a href="#%E4%BA%94%E6%9C%80%E5%A4%A7%E7%86%B5%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9">五、最大熵的优缺点</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1 id="感知机"><a href="#感知机" class="headerlink" title="感知机"></a>感知机</h1><p><strong>感知机算法是一种二分类算法。可以分为基本形式和对偶形式。</strong></p>
+<h2 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h2><p>在二维空间中，感知机模型试图寻找到一个直线区分开所有标签不同的元素。放到三维或者更高维的空间，感知机的模型就是尝试找到一个超平面，能够把所有的二元类别隔离开。当然，如果我们找不到这么一条直线的话怎么办？<strong>找不到的话那就意味着类别线性不可分，也就意味着感知机模型不适合你的数据的分类。</strong></p>
+<p>所以，使用感知机一个最大的前提，就是<strong>数据是线性可分</strong>的，这严重限制了感知机的使用场景。它的分类竞争对手在面对不可分的情况时，比如支持向量机可以通过核技巧来让数据在高维可分，神经网络可以通过优化激活函数、增加隐藏层和支持多输出，来让数据可分。</p>
+<p>感知机适用于具有线性可分的数据集的二分类问题，可以说是很局限了。它本质上是一个分离超平面。<strong>在向量维数（特征数）过高时，选择对偶形式算法。在向量个数（样本数）过多时，应选择原始算法。</strong></p>
+<h2 id="二、优缺点"><a href="#二、优缺点" class="headerlink" title="二、优缺点"></a>二、优缺点</h2><p>优点：一种比较基础的方法，复杂度低。需要对于不同的数据集选取原始算法形式还是对偶算法形式。</p>
+<p>缺点：只能处理能被二分类的问题，否则效果很差。当训练集线性不可分时，感知机学习算法不收敛，会发生震荡。</p>
+<hr>
+<h1 id="KNN算法"><a href="#KNN算法" class="headerlink" title="KNN算法"></a>KNN算法</h1><p><strong>KNN算法是一种多分类算法，也可以用于回归</strong></p>
+<h2 id="一、简介-1"><a href="#一、简介-1" class="headerlink" title="一、简介"></a>一、简介</h2><p> KNN最邻近分类算法在分类决策时只依据最邻近的一个或者几个样本的类别来决定待分类样本所属的类别，而不是靠判别类域的方法来确定所属类别的，因此对于<strong>类域的交叉或重叠较多的待分样本集来说，KNN方法较其他方法更为适合。</strong></p>
+<p>  KNN算法的关键：</p>
+<ul>
+<li>(1) 样本的所有特征都要做可比较的量化<br>若是样本特征中存在非数值的类型，必须采取手段将其量化为数值。例如样本特征中包含颜色，可通过将颜色转换为灰度值来实现距离计算。<ul>
+<li>(2) 样本特征要做<strong>归一化处理</strong><br>样本有多个参数，每一个参数都有自己的定义域和取值范围，他们对距离计算的影响不一样，如取值较大的影响力会盖过取值较小的参数。所以样本参数必须做一些 scale 处理，最简单的方式就是所有特征的数值都采取归一化处置。</li>
+<li>(3) 需要一个距离函数以计算两个样本之间的距离</li>
+<li>(4) 确定K的值<pre><code>  **K值选的太大易引起欠拟合，太小容易过拟合，需交叉验证确定K值。**</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="二、优缺点-1"><a href="#二、优缺点-1" class="headerlink" title="二、优缺点"></a>二、优缺点</h2><p><strong>KNN算法的优点：</strong></p>
+<ol>
+<li><p>简单，易于理解，易于实现，无需估计参数，无需训练；</p>
+</li>
+<li><p>适合对稀有事件进行分类；</p>
+</li>
+<li><p>特别适合于多分类问题(multi-modal,对象具有多个类别标签)， kNN比SVM的表现要好。</p>
+</li>
+</ol>
+<p><strong>KNN算法的缺点：</strong></p>
+<p>KNN算法在分类时有个主要的不足是，当样本不平衡时，如一个类的样本容量很大，而其他类样本容量很小时，有可能导致当输入一个新样本时，该样本的K个邻居中大容量类的样本占多数。该算法只计算最近的邻居样本，某一类的样本数量很大，那么或者这类样本并不接近目标样本，或者这类样本很靠近目标样本。无论怎样，数量并不能影响运行结果。可以采用权值的方法(和该样本距离小的邻居权值大)来改进。（可以才有kd树的加快搜索）</p>
+<p>该方法的另一个不足之处是计算量较大，因为对每一个待分类的文本都要计算它到全体已知样本的距离，才能求得它的K个最近邻点。</p>
+<p>可理解性差，无法给出像决策树那样的规则</p>
+<h2 id="三、用于回归"><a href="#三、用于回归" class="headerlink" title="三、用于回归"></a>三、用于回归</h2><p>　KNN算法不仅可以用于分类，还可以用于回归。通过找出一个样本的k个最近邻居，将这些邻居的属性的平均值赋给该样本，就可以得到该样本的属性。更有用的方法是将不同距离的邻居对该样本产生的影响给予不同的权值(weight)，如权值与距离成正比（组合函数）。</p>
+<hr>
+<h1 id="朴素贝叶斯算法"><a href="#朴素贝叶斯算法" class="headerlink" title="朴素贝叶斯算法"></a>朴素贝叶斯算法</h1><p><strong>朴素贝叶斯算法是一种分类算法，生成学习算法</strong></p>
+<h2 id="一、优点"><a href="#一、优点" class="headerlink" title="一、优点"></a>一、优点</h2><p>　　　　朴素贝叶斯的主要优点有：</p>
+<p>　　　　1）朴素贝叶斯模型发源于古典数学理论，有稳定的分类效率。</p>
+<p>　　　　2）对小规模的数据表现很好，能个处理多分类任务，适合增量式训练，尤其是数据量超出内存时，我们可以一批批的去增量训练。</p>
+<p>　　　　3）对缺失数据不太敏感，算法也比较简单，常用于文本分类。</p>
+<h2 id="二、缺点"><a href="#二、缺点" class="headerlink" title="二、缺点"></a>二、缺点</h2><p>　　　　朴素贝叶斯的主要缺点有：　　　</p>
+<p>1）理论上，朴素贝叶斯模型与其他分类方法相比具有最小的误差率。但是实际上并非总是如此，这是因为朴素贝叶斯模型给定输出类别的情况下,<strong>假设属性之间相互独立</strong>，这个假设在实际应用中往往是不成立的，在属性个数比较多或者属性之间相关性较大时，分类效果不好。而在属性相关性较小时，朴素贝叶斯性能最为良好。对于这一点，有半朴素贝叶斯之类的算法通过考虑部分关联性适度改进。</p>
+<p>2）<strong>需要知道先验概率，且先验概率很多时候取决于假设</strong>，假设的模型可以有很多种，因此在某些时候会由于假设的先验模型的原因导致预测效果不佳。</p>
+<p>3）由于我们是通过先验和数据来决定后验的概率从而决定分类，所以分类决策存在一定的错误率。</p>
+<p>4）对输入数据的表达形式很敏感。</p>
+<p>个人总结：贝叶斯算法还是要加强推导的练习，熟悉思路。</p>
+<hr>
+<h1 id="决策树"><a href="#决策树" class="headerlink" title="决策树"></a>决策树</h1><p><strong>决策树一类基本的回归于分类问题</strong>。一般包括特征选择，决策树的生成，和决策树的剪枝。</p>
+<p>决策树的生成对应了模型的局部选择，剪枝对应了模型的全局选择。</p>
+<p>使用决策树进行决策的过程就是从根节点开始，测试待分类项中相应的特征属性，并按照其值选择输出分支，直到到达叶子节点，将叶子节点存放的类别作为决策结果。</p>
+<p>这部分内容《统计学习》里面介绍的不多，“西瓜书”更为详尽。</p>
+<h2 id="一、特征选择"><a href="#一、特征选择" class="headerlink" title="一、特征选择"></a>一、特征选择</h2><p>一般就是就是基于信息论的，信息增益和信息增益率算法。其中ID3采用的是信息增益算法，C4.5算法是采用了启发式方法，首先候选划分属性中找出信息增益高于平均水平的属性（这样保证了大部分好的的特征），再从中选择增益率最高的（又保证了不会出现编号特征这种极端的情况）。</p>
+<p>基本思路就是，每次进行决策时，希望决策后的集合的纯度最高，也就是新的集合的信息熵最小。</p>
+<ul>
+<li>两种计算纯度方法的对比</li>
+</ul>
+<ol>
+<li>信息增益准则其实是对<strong>可取值数目较多的属性有所偏好</strong>。因为可以获得最大的纯度，可能会分为最多的类。</li>
+<li>信息增益比，相当于为原有的方法添加了损失项，会<strong>更趋向于选择少分类的项。</strong>（信息增益/特征A的熵）</li>
+</ol>
+<p>另外CART算法采用的基尼系数衡量纯度。$Gini(p) = 1-\Sigma(p_k^2)$。 如果是回归树采用方差进行衡量。</p>
+<h2 id="二、剪枝"><a href="#二、剪枝" class="headerlink" title="二、剪枝"></a>二、剪枝</h2><p>可以分为预剪枝和后剪枝</p>
+<ul>
+<li>基于贪心思路的预剪枝的复杂度低，降低了训练时间。但是存在欠拟合的风险</li>
+<li>后剪枝时首先从训练集中生成一棵完整的决策树，然后下而上的剪枝。这样复杂度高，但是欠拟合风险低且泛化能力强。</li>
+</ul>
+<h2 id="三、连续值和缺失值的处理。"><a href="#三、连续值和缺失值的处理。" class="headerlink" title="三、连续值和缺失值的处理。"></a>三、连续值和缺失值的处理。</h2><ul>
+<li>连续值的处理</li>
+</ul>
+<p>以上的属性值都是离散的，现实中通常会遇到连续的属性值。这个时候，连续属性离散化技术就可以用上啦，C4.5决策树算法采用的是最简单的策略二分法来对连续值进行处理。给西瓜属性考虑密度的属性，首先把不同样本的密度值按照从小到大排序，然后找到候选划分点，把每个候选划分点的信息增益算出来，取max的值作为密度的信息增益。第二次max就是找到最优划分属性了。</p>
+<ul>
+<li>缺失值的处理</li>
+</ul>
+<p>如果样本中有缺失值，那么会产生以下两个问题：</p>
+<p>（1）如何在属性值缺失的情况下计算属性的信息增益，从而进行划分属性的选择？</p>
+<p>（2）给定划分属性，如果样本在该属性值上是缺失的，如何对这个样本进行划分？</p>
+<p>针对（1）的处理非常简单，假设17个样本在“色泽”属性上只有14个是有值的，另外3个是缺失的，那么就以这14个样本的属性值计算信息增益，然后把这个值乘以14/17，相当于乘上一个权重，当作这全部17个样本的信息增益。然后进行后续的属性划分。</p>
+<p>针对（2）的处理也很简单，本来每个样本在结点中的权重都是1，当样本「8」在“纹理”上出现缺失值，那么在“纹理=清晰”、“纹理=模糊”、“纹理=稍糊”这三个分支中都会出现样本「8」，只是权重不再是1，而是7/15，5/15，3/15（这三个权重的来源是这三个分支中各个样本的比例，不包括这个样本「8」）</p>
+<hr>
+<h1 id="逻辑斯蒂回归"><a href="#逻辑斯蒂回归" class="headerlink" title="逻辑斯蒂回归"></a>逻辑斯蒂回归</h1><h2 id="一、基础概念"><a href="#一、基础概念" class="headerlink" title="一、基础概念"></a>一、基础概念</h2><p>LR回归的核心在于引入了新的平滑函数sigmoid函数，这种函数相比于感知机的符号函数sgn函数好处在于可以求导，可以求导意味着可以进行梯度下降。（在感知机中实际上是最小化 $y_i(w*x_i+b)$）</p>
+<p>并且相对于感知机算法，只要$wx+b&gt;0$就判定为1的策略。再sigmoid的函数帮助下，我们可以得到一个相对精确的概率。<br><img src="https://img-blog.csdnimg.cn/20200506210034282.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>我们需要假设数据符合这一分布，在得到了分布模型之后，我们可以通过<strong>最大似然估计</strong>的方法得到模型的相关参数。因为sigmoid是平滑可导的，我们可以对似然函数求导，进行梯度下降寻找参数的最优点。<br><img src="https://img-blog.csdnimg.cn/20200506210457142.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>需要注意得到的对数似然函数，N为样本数量。</p>
+<p>对似然函数求导可以得到：</p>
+<p>$\frac{\partial L(w)}{\partial w_i}={y_i}{x_i}-\frac{x_i\exp(wx_i)}{1 + \exp {w{x_i}})}$</p>
+<p>对于LR的理解可以看为线性模型$w^Tx$的结果压缩到了[0, 1]的空间上，具有了概率意义。</p>
+<h2 id="二、对数几率-log-odds"><a href="#二、对数几率-log-odds" class="headerlink" title="二、对数几率(log odds)"></a>二、对数几率(log odds)</h2><p>定义对数几率为$logit(p) = \log(\frac{p}{1-p})$</p>
+<hr>
+<h1 id="最大熵原理"><a href="#最大熵原理" class="headerlink" title="最大熵原理"></a>最大熵原理</h1><p><strong>核心本质：系统中事件发生的概率满足一切已知约束条件，不对任何未知信息做假设，也就是对于未知的，当作等概率处理。</strong></p>
+<h2 id="一、最大熵模型"><a href="#一、最大熵模型" class="headerlink" title="一、最大熵模型"></a>一、最大熵模型</h2><p><img src="https://img-blog.csdnimg.cn/20200506213843176.png" alt="在这里插入图片描述"></p>
+<p>我们希望得到的在满足了所有约束的前提下，其余时间的发生概率都是等概率的，也就是熵最大。我们可以从样本集中知道x的经验概率。因此我们希望得到一个模型$p(x|y)$能够做到$H(p)$ 最大。</p>
+<h2 id="二、最大熵模型的学习"><a href="#二、最大熵模型的学习" class="headerlink" title="二、最大熵模型的学习"></a>二、最大熵模型的学习</h2><p><img src="https://img-blog.csdnimg.cn/20200506214217813.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>从数据集中我们可以的一些关于x和y的经验分布知识，这里的特征函数$f_i$是一种存在关系。<br><img src="https://img-blog.csdnimg.cn/2020050621462277.png" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/20200506214638333.png" alt="在这里插入图片描述"></p>
+<p>可以认为如果(x, y)出现在训练集中，那么它就是1，因为一旦出现在训练集中，说明(x, y)对已经符合了某一样本的事实了。P上面的短横表示这个模型是基于训练集得出来的，只能被称为经验分布。<br>这个约束实际上要求我们训练出来的模型$p(y|x)$需要很接近$\bar{p}(y|x)$.</p>
+<p>对于最优化问题我们采用引入拉格朗日乘子，定义为$L(P,w)$<br><img src="https://img-blog.csdnimg.cn/20200506215000719.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p> 注意这里可以对偶问题等价的条件是因为是凸函数。我们首先需要找到一个让$L(P,w)$最小的$P(y|x)$。因此我们对$L(P, w)$求导。</p>
+<p> 求导得到结果：<br> <img src="https://img-blog.csdnimg.cn/20200506215540260.png" alt="在这里插入图片描述"></p>
+<p>进一步变形整理<br><img src="https://img-blog.csdnimg.cn/20200506215606512.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>这一步其实没有实质性变化，只是化为了标准形式而已。</p>
+<p>只需要带回去$L(w,p)$函数，在进一步对w求导就可以得到极值，但是这里出现了一个问题。将最优的p带回函数后，发现是无法对w求导解决的，因为是不可解析的。</p>
+<h2 id="三、最大化-L-w-与最大似然估计是等价的"><a href="#三、最大化-L-w-与最大似然估计是等价的" class="headerlink" title="三、最大化$L(w)$与最大似然估计是等价的"></a>三、最大化$L(w)$与最大似然估计是等价的</h2><p>关于如何得到的对数似然函数可以参见，<a target="_blank" rel="noopener" href="https://blog.csdn.net/wkebj/article/details/77965714">参考文献</a></p>
+<p><img src="https://img-blog.csdnimg.cn/20200506223447193.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="四、最大熵模型的最优化算法"><a href="#四、最大熵模型的最优化算法" class="headerlink" title="四、最大熵模型的最优化算法"></a>四、最大熵模型的最优化算法</h2><p>希望求解的是对偶函数的最大化条件，但是由于得不到显式的解析解，因此需要借助数值算法。好在目标函数是一个光滑的凸函数，因此可以采用多种方法求解，并且保证得到最优解。</p>
+<p>这里采用IIS的方法：<br>核心在于求解<br><img src="https://img-blog.csdnimg.cn/20200506222159506.png" alt="在这里插入图片描述"></p>
+<p><strong>在代码层面实现：M可以看成学习速率，6.34式分子部分是给定数据集就确定的，分母部分每次更新完w之后需要重新计算</strong><br><img src="https://img-blog.csdnimg.cn/20200507224211467.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="五、最大熵的优缺点"><a href="#五、最大熵的优缺点" class="headerlink" title="五、最大熵的优缺点"></a>五、最大熵的优缺点</h2><ul>
+<li>最大熵模型的优点有：</li>
+</ul>
+<p>　　　　a) 最大熵统计模型获得的是所有满足约束条件的模型中信息熵极大的模型,作为经典的分类模型时准确率较高。</p>
+<p>　　　　b) 可以灵活地设置约束条件，通过约束条件的多少可以调节模型对未知数据的适应度和对已知数据的拟合程度</p>
+<ul>
+<li>最大熵模型的缺点有：</li>
+</ul>
+<p>　　　　a) 由于约束函数数量和样本数目有关系，导致迭代过程计算量巨大，实际应用比较难。</p>
 
-    
+	
+   
 
 
 
@@ -275,7 +433,29 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">机器学习</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/统计学习算法//" class="article-tag-list-link color2">统计学习算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
 
       
 
@@ -325,7 +505,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/categories/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91%E6%84%9F%E7%9F%A5%E6%9C%BA/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -337,6 +517,25 @@
 </article>
 
   
+<nav id="article-nav">
+  
+    <a href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part1%EF%BC%8C%20%E5%89%8D%E4%B8%83%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          【统计学习算法】Part1，前七章的学习笔记
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/10/13/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%8A%B6%E6%80%81%E5%8E%8B%E7%BC%A9Dp%EF%BC%8C%E5%9B%9E%E6%96%87%E4%B8%B2%EF%BC%8Cflody%E7%AE%97%E6%B3%95/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">【周赛总结】状态压缩Dp，回文串，flody算法</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -355,6 +554,16 @@
 </aside>
 
 
+
+  
+  
+  
+
+  
+
+  
+
+  
 
 
           </div>
@@ -389,7 +598,7 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

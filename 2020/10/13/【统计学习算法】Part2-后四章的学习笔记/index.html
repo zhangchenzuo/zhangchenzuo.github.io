@@ -8,20 +8,54 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>分类 | 小张的技术小木屋</title>
+  <title>【统计学习算法】Part2, 后四章的学习笔记 | 小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
-<meta property="og:type" content="website">
-<meta property="og:title" content="分类">
-<meta property="og:url" content="http://example.com/categories/index.html">
+  <meta name="description" content="本文主要整理了在阅读李航的《统计学习方法》中的学习笔记，阅读过程中参考了很多前人的总结和分析，收获良多。在此无法一一感谢，很多笔记都是拾人牙慧，如有侵权，请告知我将进行修改。 代码实现开源在我的 Github。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【统计学习算法】Part2, 后四章的学习笔记">
+<meta property="og:url" content="http://example.com/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part2-%E5%90%8E%E5%9B%9B%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
-<meta property="og:description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
+<meta property="og:description" content="本文主要整理了在阅读李航的《统计学习方法》中的学习笔记，阅读过程中参考了很多前人的总结和分析，收获良多。在此无法一一感谢，很多笔记都是拾人牙慧，如有侵权，请告知我将进行修改。 代码实现开源在我的 Github。">
 <meta property="og:locale">
-<meta property="article:published_time" content="2020-10-06T14:11:41.000Z">
-<meta property="article:modified_time" content="2020-10-10T11:56:53.124Z">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200512235126527.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200512235259453.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200512235850388.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200512235926263.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200512235937324.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200513000758362.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2020051300124516.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200513001307915.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200513003559694.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200513003620763.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200515211247774.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200515211257676.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200516003930811.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200516003939690.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200516004024129.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200516004032690.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2020051616561762.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200516165628567.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200516170741106.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200516171002111.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200516171129394.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200520151534945.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200520152837488.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200520152845380.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200520153408417.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200520153421163.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200520153621294.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200520153641698.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200520153740770.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200520153748729.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2020052015394748.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2020052015444897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200520154456178.png">
+<meta property="article:published_time" content="2020-10-13T09:16:33.000Z">
+<meta property="article:modified_time" content="2020-10-13T09:26:39.368Z">
 <meta property="article:author" content="Chenzuo Zhang">
-<meta property="article:tag" content="Java,Leetcode,工程师,代码,后端开发,大数据开发">
+<meta property="article:tag" content="机器学习">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200512235126527.png">
   
     <link rel="alternative" href="/atom.xml" title="小张的技术小木屋" type="application/atom+xml">
   
@@ -194,14 +228,14 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="page-" class="article article-type-page " itemscope itemprop="blogPost">
+            <article id="post-【统计学习算法】Part2-后四章的学习笔记" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      分类
+      【统计学习算法】Part2, 后四章的学习笔记
     </h1>
   
 
@@ -213,8 +247,8 @@
         </span>
 
 
-<a href="/categories/index.html" class="archive-article-date">
-  	<time datetime="2020-10-06T14:11:41.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-06</time>
+<a href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part2-%E5%90%8E%E5%9B%9B%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="archive-article-date">
+  	<time datetime="2020-10-13T09:16:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-13</time>
 </a>
         <!-- 需要添加的位置 -->
         <!-- 开始添加字数统计-->
@@ -224,7 +258,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">0字</span>
+        <span class="post-count">2.6k字</span>
       </span>
     </span>
 
@@ -233,7 +267,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-hourglass-half"></i>
         <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">1分</span>
+        <span class="post-count">9分</span>
       </span>
     </span>
 </div>
@@ -255,18 +289,130 @@
   <div class="article-entry" itemprop="articleBody">
    
 
-    <div class="category-all-page">
-	<div class="category-all-title">
-	counter.categories
-	</div>
 	
-	<div class="category-all">
-	<ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JAVA%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/">JAVA学习总结</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93/">周赛总结</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/">每日一题</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95/">统计学习算法</a><span class="category-list-count">2</span></li></ul>
-	</div>
-	
-    </div>
+		<p>本文主要整理了在阅读李航的《统计学习方法》中的学习笔记，阅读过程中参考了很多前人的总结和分析，收获良多。在此无法一一感谢，很多笔记都是拾人牙慧，<strong>如有侵权，请告知我将进行修改</strong>。</p>
+<p>代码实现开源在我的 <a target="_blank" rel="noopener" href="https://github.com/zhangchenzuo/Statistical-Learning-Method-by-Python">Github</a>。</p>
+<a id="more"></a>
+<ul>
+<li><a href="#%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BAsvm">支持向量机SVM</a><ul>
+<li><a href="#%E4%B8%80%E7%AE%80%E4%BB%8B">一、简介</a></li>
+<li><a href="#%E4%BA%8C%E4%BB%80%E4%B9%88%E6%98%AF%E9%97%B4%E9%9A%94">二、什么是间隔</a></li>
+<li><a href="#%E4%B8%89%E7%BA%BF%E6%80%A7%E5%8F%AF%E5%88%86%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA">三、线性可分支持向量机</a><ul>
+<li><a href="#%E4%BC%98%E5%8C%96%E9%97%AE%E9%A2%98%E7%9A%84%E8%BD%AC%E5%8C%96">优化问题的转化</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9B%9B%E7%BA%BF%E6%80%A7%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA">四、线性支持向量机</a></li>
+</ul>
+</li>
+<li><a href="#adaboost%E7%AE%97%E6%B3%95">AdaBoost算法</a><ul>
+<li><a href="#%E4%B8%80%E6%A6%82%E8%BF%B0">一、概述</a></li>
+<li><a href="#%E4%BA%8C%E5%AF%B9adaboost%E7%AE%97%E6%B3%95%E7%9A%84%E8%A7%A3%E9%87%8A">二、对AdaBoost算法的解释</a></li>
+<li><a href="#%E4%B8%89%E6%8F%90%E5%8D%87%E6%A0%91">三、提升树</a></li>
+<li><a href="#%E5%9B%9B%E6%A2%AF%E5%BA%A6%E6%8F%90%E5%8D%87%E5%86%B3%E7%AD%96%E6%A0%91gbdt">四、梯度提升决策树GBDT</a></li>
+</ul>
+</li>
+<li><a href="#em%E7%AE%97%E6%B3%95">Em算法</a><ul>
+<li><a href="#%E4%B8%80%E6%A6%82%E8%BF%B0-1">一、概述</a></li>
+<li><a href="#%E4%BA%8Cgmm%E9%AB%98%E6%96%AF%E6%B7%B7%E5%90%88%E7%BB%9F%E8%AE%A1%E6%A8%A1%E5%9E%8B">二、GMM高斯混合统计模型</a></li>
+<li><a href="#%E4%B8%89em%E7%AE%97%E6%B3%95%E7%9A%84%E6%80%9D%E8%80%83">三、EM算法的思考</a></li>
+</ul>
+</li>
+<li><a href="#%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E6%A8%A1%E5%9E%8Bhmm">隐马尔可夫模型HMM</a><ul>
+<li><a href="#%E4%B8%80%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E6%A8%A1%E5%9E%8B">一、马尔可夫模型</a></li>
+<li><a href="#%E4%BA%8C%E4%B8%89%E4%B8%AA%E5%9F%BA%E6%9C%AC%E9%97%AE%E9%A2%98">二、三个基本问题</a></li>
+<li><a href="#%E4%B8%89%E6%A6%82%E7%8E%87%E8%AE%A1%E7%AE%97%E9%97%AE%E9%A2%98">三、概率计算问题</a></li>
+<li><a href="#%E5%9B%9B%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95">四、学习算法</a><ul>
+<li><a href="#%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E7%9F%A5%E9%81%93%E8%A7%82%E6%B5%8B%E8%BF%98%E7%9F%A5%E9%81%93%E6%AF%8F%E4%B8%AA%E8%A7%82%E6%B5%8B%E5%AF%B9%E5%BA%94%E7%9A%84%E7%8A%B6%E6%80%81">监督学习算法：知道观测还知道每个观测对应的状态</a></li>
+<li><a href="#%E9%9D%9E%E7%9B%91%E7%9D%A3%E7%AE%97%E6%B3%95bw%E7%AE%97%E6%B3%95%E6%9C%AC%E8%B4%A8%E6%98%AFem%E7%AE%97%E6%B3%95">非监督算法：BW算法（本质是EM算法）</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%94%E9%A2%84%E6%B5%8B%E9%97%AE%E9%A2%98">五、预测问题</a><ul>
+<li><a href="#%E8%BF%91%E4%BC%BC%E7%AE%97%E6%B3%95">近似算法</a></li>
+<li><a href="#%E7%BB%B4%E7%89%B9%E6%AF%94%E7%AE%97%E6%B3%95">维特比算法</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1 id="支持向量机SVM"><a href="#支持向量机SVM" class="headerlink" title="支持向量机SVM"></a>支持向量机SVM</h1><h2 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h2><p>SVM是一种分类算法，实际上是在数据集中设计出了一个超平面，划分开了所有的样本进而进行分类。划分的依据是样本点距离超平面的间隔最大化，这有别于感知机。svm算法实现了寻找最佳的分类平面，并且借助核技巧，svm可以划分非线性可分样本。</p>
+<p>svm的学习策略是间隔最大化，可以形式上为求解一个凸二次规划问题，也等价于正则化的合页损失函数最小化的问题。svm的学习是在特征空间上进行的。</p>
+<h2 id="二、什么是间隔"><a href="#二、什么是间隔" class="headerlink" title="二、什么是间隔"></a>二、什么是间隔</h2><p>直接开门见山了：可以分为两种间隔，但是都是几何上很容易理解的。<br>首先是函数间隔<br><img src="https://img-blog.csdnimg.cn/20200512235126527.png" alt="在这里插入图片描述">如果我们对w进行规范化，就可以得到升级版的几何间隔：<br><img src="https://img-blog.csdnimg.cn/20200512235259453.png" alt="在这里插入图片描述"></p>
+<h2 id="三、线性可分支持向量机"><a href="#三、线性可分支持向量机" class="headerlink" title="三、线性可分支持向量机"></a>三、线性可分支持向量机</h2><p>利用硬间隔最大化求得最优分离超平面，此时解是唯一的。<br>超平面：<code>wx+b=0</code><br>分类决策函数：<code>f(x = sign(wx+b))</code></p>
+<h3 id="优化问题的转化"><a href="#优化问题的转化" class="headerlink" title="优化问题的转化"></a>优化问题的转化</h3><ol>
+<li><p><strong>最原始问题：</strong><br><img src="https://img-blog.csdnimg.cn/20200512235850388.png" alt="在这里插入图片描述"></p>
+</li>
+<li><p><strong>考虑几何间隔，并且变形</strong><br><img src="https://img-blog.csdnimg.cn/20200512235926263.png" alt="在这里插入图片描述"><br>因为gamma是无关项，不影响最优化问题的求解。<br><img src="https://img-blog.csdnimg.cn/20200512235937324.png" alt="在这里插入图片描述"></p>
+</li>
+<li><p><strong>为了求解，构造拉格朗日函数，求解对偶问题</strong><br><img src="https://img-blog.csdnimg.cn/20200513000758362.png" alt="在这里插入图片描述"></p>
+</li>
+</ol>
+<p>在化为拉格朗日函数之后，原始问题变为极小极大问题，<code>min(w,b)max(a)L(w,b,a)</code>，因此对偶问题就是极大极小问题。为了得到对偶问题的解，首先需要求w，b的极小，再求解a的极大。</p>
+<p><img src="https://img-blog.csdnimg.cn/2020051300124516.png" alt="在这里插入图片描述"><br>求解a的最大就是对偶问题，<br><img src="https://img-blog.csdnimg.cn/20200513001307915.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>进一步可以转换为求解极小问题。由于满足<code>f(x),c(x)</code>是凸函数，<code>h(x)</code>是仿射的，且满足<code>c(x)&lt;0</code>的条件。</p>
+<h2 id="四、线性支持向量机"><a href="#四、线性支持向量机" class="headerlink" title="四、线性支持向量机"></a>四、线性支持向量机</h2><p>拓展到线性不可分问题，引入一个松弛变量$\zeta&gt;=0$，约束条件变为$y_i(w*x_i+b)&gt;=1-\zeta_i$<br><img src="https://img-blog.csdnimg.cn/20200513003559694.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20200513003620763.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>后面具体的推导还是看书和代码叭。</p>
+<hr>
+<h1 id="AdaBoost算法"><a href="#AdaBoost算法" class="headerlink" title="AdaBoost算法"></a>AdaBoost算法</h1><h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>提升方法是一种常用的统计学习方法，<strong>在分类问题中</strong>，通过改变训练样本的权值，学习多个分类器，并且依据一定的权值对这些分类器进行线性组合，提高分类性能。</p>
+<p><img src="https://img-blog.csdnimg.cn/20200515211247774.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/20200515211257676.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p><strong>注意</strong>：</p>
+<ol>
+<li>需要区分开不同的权值，首先是在每次训练新的分类器时，每个样本的权值时不同的，也就是$w_{mi}$表示每个样本的重要程度不同。对于之前预测错误的样本，在新的分类器中会有更大的权重。并且这个权值是需要进行归一化的，如公式8.4</li>
+<li>对于每一个分类器，在最后的线性组合时也有不同的权重进行线性组合，依据本分类器的对数几率$\alpha_m$.。选择合适的$\alpha_m$也可以让训练误差下降最快。</li>
+</ol>
+<h2 id="二、对AdaBoost算法的解释"><a href="#二、对AdaBoost算法的解释" class="headerlink" title="二、对AdaBoost算法的解释"></a>二、对AdaBoost算法的解释</h2><p>可以认为该算法<strong>是模型为加法模型，损失函数为指数函数，学习算法为前向分步算法的二类分类算法</strong>。</p>
+<p>为什么选定指数函数作为损失函数？</p>
+<p>这是因为极小化指数损失函数等价于最小化分类误差率，并且由于指数损失函数是连续可微的，具有更好的数学性质，因此用它来代替0/1损失函数作为优化目标。</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/ScorpioLu/p/8295990.html">AdaBoost的前向分类算法的推导</a></p>
+<h2 id="三、提升树"><a href="#三、提升树" class="headerlink" title="三、提升树"></a>三、提升树</h2><p>以决策树为基函数的提升方法。针对不同的问题，提升树的学习算法不同，主要区别在于使用损失函数不同。包括使用平方误差函数的回归问题，和使用指数损失函数的分类问题，以及一般损失函数的一般决策问题。</p>
+<p>提升树的算法可以应用到回归问题上，</p>
+<p><img src="https://img-blog.csdnimg.cn/20200516003930811.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/20200516003939690.png" alt="在这里插入图片描述"></p>
+<h2 id="四、梯度提升决策树GBDT"><a href="#四、梯度提升决策树GBDT" class="headerlink" title="四、梯度提升决策树GBDT"></a>四、梯度提升决策树GBDT</h2><p><img src="https://img-blog.csdnimg.cn/20200516004024129.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20200516004032690.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>关于GBDT的模型，可以参考<br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzAxMjUyNDQ5OA==&mid=2653557219&idx=1&sn=523502247d6a7c5f0a4c795a31dc0f47&chksm=806e3f5eb719b64850348792bc8ac680ae2632eb71699779d1cb54230a278980d8c843128438&scene=21#wechat_redirect">GBDT回归</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/bf02jgtrs00xktcx/article/details/82719765">GBDT分类</a></p>
+<hr>
+<h1 id="Em算法"><a href="#Em算法" class="headerlink" title="Em算法"></a>Em算法</h1><h2 id="一、概述-1"><a href="#一、概述-1" class="headerlink" title="一、概述"></a>一、概述</h2><p>Em算法是一种迭代算法，用于对含有隐变量的概率模型参数的极大似然估计。或者极大后验概率。<br>E步，求解期望；M步，求解极大。也成为期望极大算法。</p>
+<p>首先解释隐变量，隐变量是指我们无法观测到的变量，这要是我们需要估计的。三个硬币，A硬币的为正面就第二次投掷B硬币，否则投掷C硬币。并且记录第二次投掷的结果作为观测值。因此我们可以想象，最终第二次的结果是可以被观测的，但是第一次投掷的结果其实是隐含在了第一次投掷的结果里。</p>
+<p>如果Y表示观测数据，$P(Y| \theta)$其中$\theta$表示需要估计的参量。</p>
+<p><img src="https://img-blog.csdnimg.cn/2020051616561762.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/20200516165628567.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>从算法可以看出，我们实际上希望得到了一个关于完全数据的分布，并且我们通过最大化完全数据的期望，对隐变量数据进行了估计。</p>
+<p>关于Em的推导可以<a target="_blank" rel="noopener" href="https://blog.csdn.net/u010834867/article/details/90762296">参考这个链接</a></p>
+<h2 id="二、GMM高斯混合统计模型"><a href="#二、GMM高斯混合统计模型" class="headerlink" title="二、GMM高斯混合统计模型"></a>二、GMM高斯混合统计模型</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/lin_limin/article/details/81048411">参考文献</a></p>
+<p>这里观测量是多个高斯模型混合得到的数据，隐变量是来源于哪个独立高斯分布未知。</p>
+<p>我们首先计算出来完全数据的分布函数，<br><img src="https://img-blog.csdnimg.cn/20200516170741106.png" alt="在这里插入图片描述"></p>
+<p>其中，隐变量$\gamma$是我们未知的，我们需要对它进行估计，估计方法就是计算均值（E步），然后对均值最大化，注意，这时均值只与样本有关了，因此我们可以通过最大化这一步，得到参数的估计。进而进行迭代。<br>下式式计算均值<br><img src="https://img-blog.csdnimg.cn/20200516171002111.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">进而得到对对$\gamma$的估计</p>
+<p>然后进行M步，求导进行寻找实现最大化的参数<br><img src="https://img-blog.csdnimg.cn/20200516171129394.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="三、EM算法的思考"><a href="#三、EM算法的思考" class="headerlink" title="三、EM算法的思考"></a>三、EM算法的思考</h2><ol>
+<li><p>对EM算法的初始化研究<br>上面介绍的传统EM算法对初始值敏感，聚类结果随不同的初始值而波动较大。总的来说，EM算法收敛的优劣很大程度上取决于其初始参数。<br>有说法提出，先进行kmeans聚类计算中心，然后将中心作为初值</p>
+</li>
+<li><p>EM算法是否一定收敛？<br>结论：EM算法可以保证收敛到一个稳定点，即EM算法是一定收敛的。</p>
+</li>
+<li><p>如果EM算法收敛，能否保证收敛到全局最大值？<br>结论：EM算法可以保证收敛到一个稳定点，但是却不能保证收敛到全局的极大值点，因此它是<strong>局部最优</strong>的算法，当然，如果我们的优化目标是凸的，则EM算法可以保证收敛到全局最大值，这点和梯度下降法这样的迭代算法相同。</p>
+</li>
+</ol>
+<hr>
+<h1 id="隐马尔可夫模型HMM"><a href="#隐马尔可夫模型HMM" class="headerlink" title="隐马尔可夫模型HMM"></a>隐马尔可夫模型HMM</h1><p>是可以用于标注问题的统计学习模型，描述由隐藏的马尔可夫链生成观测序列的过程，属于生成模型。</p>
+<h2 id="一、马尔可夫模型"><a href="#一、马尔可夫模型" class="headerlink" title="一、马尔可夫模型"></a>一、马尔可夫模型</h2><p>具有三个参数，状态集合（状态转移概率矩阵），观测集合（观测概率矩阵），初始状态概率向量。<br><img src="https://img-blog.csdnimg.cn/20200520151534945.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70"></p>
+<p>这三个参数：<br>$\lambda:N$个参数<br>$A:N<em>N$ 对应状态的转移<br>$B:N</em>M$ 对应每种状态可能的观测值</p>
+<ul>
+<li>基本假设：齐次性，观测独立性<h2 id="二、三个基本问题"><a href="#二、三个基本问题" class="headerlink" title="二、三个基本问题"></a>二、三个基本问题</h2></li>
+</ul>
+<ol>
+<li>概率计算问题：$P(O|\lambda)$ 给定了一个参数，出现这种观测的概率是多少</li>
+<li>学习问题：$argmax_{\lambda}P(\lambda|O)$ 给了一个观测值，寻找参数。采用极大似然估计</li>
+<li>预测问题：$argmax_{I}P(I|O)$ 给了观测变量，推断隐变量，也就是状态。让计算机去标注词性</li>
+</ol>
+<h2 id="三、概率计算问题"><a href="#三、概率计算问题" class="headerlink" title="三、概率计算问题"></a>三、概率计算问题</h2><p>直接计算的方法复杂度太高$O(TN^T)$<br>前向算法，给定了前向概率，即t时刻的状态和前面的观测序列。这种方法的复杂度是$O(TN^2)$<br><img src="https://img-blog.csdnimg.cn/20200520152837488.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20200520152845380.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>同样后向算法，是给定了后向概率，即t时刻的状态和之后观测值。</p>
+<h2 id="四、学习算法"><a href="#四、学习算法" class="headerlink" title="四、学习算法"></a>四、学习算法</h2><h3 id="监督学习算法：知道观测还知道每个观测对应的状态"><a href="#监督学习算法：知道观测还知道每个观测对应的状态" class="headerlink" title="监督学习算法：知道观测还知道每个观测对应的状态"></a>监督学习算法：知道观测还知道每个观测对应的状态</h3><p><img src="https://img-blog.csdnimg.cn/20200520153408417.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt=" "><img src="https://img-blog.csdnimg.cn/20200520153421163.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3 id="非监督算法：BW算法（本质是EM算法）"><a href="#非监督算法：BW算法（本质是EM算法）" class="headerlink" title="非监督算法：BW算法（本质是EM算法）"></a>非监督算法：BW算法（本质是EM算法）</h3><p><img src="https://img-blog.csdnimg.cn/20200520153621294.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/20200520153641698.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>其中需要带入<br><img src="https://img-blog.csdnimg.cn/20200520153740770.png" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20200520153748729.png" alt="在这里插入图片描述"></p>
+<h2 id="五、预测问题"><a href="#五、预测问题" class="headerlink" title="五、预测问题"></a>五、预测问题</h2><h3 id="近似算法"><a href="#近似算法" class="headerlink" title="近似算法"></a>近似算法</h3><p>计算出每个时刻的最大的概率的状态，作为实际状态。<br><img src="https://img-blog.csdnimg.cn/2020052015394748.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p><strong>存在的问题是</strong>，每次都是孤立的考虑，没有考虑前后状态的影响。不是全局最优的。</p>
+<h3 id="维特比算法"><a href="#维特比算法" class="headerlink" title="维特比算法"></a>维特比算法</h3><p>目标是全局最优$argmaxP(I|O,\lambda)$。采用了动态规划的思想，每次只需要考虑前一个状态就可以。<br><img src="https://img-blog.csdnimg.cn/2020052015444897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/20200520154456178.png" alt="在这里插入图片描述"></p>
+<p>算法中$\delta_t(i)$当前t时刻的状态是qi，且满足观测的最大概率（这个最大概率是说从前面转移来的最大概率/最优路径）。<br>$\psi_t(i)$表示这个最优路径是从前一个的哪个状态传递得来的。最后进行回溯就可以得到最优的序列。</p>
 
-    
+	
+   
 
 
 
@@ -275,7 +421,29 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">机器学习</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/统计学习方法//" class="article-tag-list-link color2">统计学习方法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
 
       
 
@@ -325,7 +493,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/categories/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part2-%E5%90%8E%E5%9B%9B%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -337,6 +505,16 @@
 </article>
 
   
+<nav id="article-nav">
+  
+  
+    <a href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part1%EF%BC%8C%20%E5%89%8D%E4%B8%83%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">【统计学习算法】Part1，前七章的学习笔记</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -355,6 +533,16 @@
 </aside>
 
 
+
+  
+  
+  
+
+  
+
+  
+
+  
 
 
           </div>
@@ -389,7 +577,7 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

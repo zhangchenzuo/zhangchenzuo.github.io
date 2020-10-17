@@ -8,18 +8,31 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Category: 统计学习方法 | 小张的技术小木屋</title>
+  <title>【JVM】垃圾回收机制 | 小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
-<meta property="og:type" content="website">
-<meta property="og:title" content="小张的技术小木屋">
-<meta property="og:url" content="http://example.com/categories/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/index.html">
+  <meta name="description" content="《深入理解JAVA虚拟机》读书笔记系列之：垃圾回收机制。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【JVM】垃圾回收机制">
+<meta property="og:url" content="http://example.com/2020/10/17/%E3%80%90JVM%E3%80%91%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
-<meta property="og:description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
+<meta property="og:description" content="《深入理解JAVA虚拟机》读书笔记系列之：垃圾回收机制。">
 <meta property="og:locale">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201017152928290.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201017153034521.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201017153519909.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201017153957419.png#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201017154132884.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201017162754658.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201017172523916.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201017173326311.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="article:published_time" content="2020-10-17T10:26:16.000Z">
+<meta property="article:modified_time" content="2020-10-17T10:31:14.299Z">
 <meta property="article:author" content="Chenzuo Zhang">
-<meta property="article:tag" content="Java,Leetcode,工程师,代码,后端开发,大数据开发">
+<meta property="article:tag" content="JVM">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="垃圾回收">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20201017152928290.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
   
     <link rel="alternative" href="/atom.xml" title="小张的技术小木屋" type="application/atom+xml">
   
@@ -192,73 +205,412 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-【JVM】垃圾回收机制" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-
-<a href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part2-%E5%90%8E%E5%9B%9B%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="archive-article-date">
-  	<time datetime="2020-10-13T09:16:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-13</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part2-%E5%90%8E%E5%9B%9B%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">【统计学习算法】Part2, 后四章的学习笔记</a>
+    <h1 class="article-title" itemprop="name">
+      【JVM】垃圾回收机制
     </h1>
   
 
-        <div class="article-info info-on-right">
+        
+        
+        <!-- 不蒜子统计 -->
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
+
+<a href="/2020/10/17/%E3%80%90JVM%E3%80%91%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" class="archive-article-date">
+  	<time datetime="2020-10-17T10:26:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-17</time>
+</a>
+        <!-- 需要添加的位置 -->
+        <!-- 开始添加字数统计-->
+        
+          <div style="margin-top:10px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">3.3k字</span>
+      </span>
+    </span>
+
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">  阅读时长: </span>
+        <span class="post-count">11分</span>
+      </span>
+    </span>
+</div>
+
           
+        <!-- 添加完成 -->
+
+        
+
+  
+    <span class="archive-article-date">
+        阅读量 <span id="busuanzi_value_page_pv"></span>
+    </span>
+  
+
+      </header>
+    
+
+  <div class="article-entry" itemprop="articleBody">
+   
+
+	
+		<p>《深入理解JAVA虚拟机》读书笔记系列之：垃圾回收机制。</p>
+<a id="more"></a>
+
+<ul>
+<li><a href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%9F%BA%E7%A1%80">垃圾回收基础</a><ul>
+<li><a href="#%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0%E6%B3%95">引用计数法</a></li>
+<li><a href="#%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90%E6%B3%95%E6%A0%B9%E6%90%9C%E7%B4%A2%E6%B3%95">可达性分析法（根搜索法）</a></li>
+<li><a href="#%E5%BC%95%E7%94%A8%E5%88%86%E7%B1%BB">引用分类</a></li>
+<li><a href="#%E5%88%A4%E6%96%AD%E5%9E%83%E5%9C%BE%E7%9A%84%E6%AD%A5%E9%AA%A4">判断垃圾的步骤</a></li>
+</ul>
+</li>
+<li><a href="#gc%E7%B1%BB%E5%9E%8B">GC类型</a><ul>
+<li><a href="#%E8%B7%A8%E4%BB%A3%E5%BC%95%E7%94%A8">跨代引用</a></li>
+<li><a href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E7%B1%BB%E5%9E%8B">垃圾收集类型：</a></li>
+<li><a href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E7%AE%97%E6%B3%95">垃圾收集算法</a><ul>
+<li><a href="#%E5%9F%BA%E7%A1%80%E7%AE%97%E6%B3%95">基础算法</a></li>
+<li><a href="#%E5%88%86%E9%85%8D%E6%8B%85%E4%BF%9D">分配担保</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#hotspot%E6%94%B6%E9%9B%86%E5%99%A8">HotSpot收集器</a><ul>
+<li><a href="#serial-%E4%B8%B2%E8%A1%8C%E6%94%B6%E9%9B%86%E5%99%A8">Serial 串行收集器</a></li>
+<li><a href="#panew-%E5%B9%B6%E8%A1%8C%E6%94%B6%E9%9B%86%E5%99%A8">PaNew 并行收集器</a></li>
+<li><a href="#parallel-scavenge%E6%94%B6%E9%9B%86%E5%99%A8parallel-old">Parallel Scavenge收集器/Parallel Old</a></li>
+<li><a href="#cms%E6%94%B6%E9%9B%86%E5%99%A8%E5%B9%B6%E5%8F%91%E6%94%B6%E9%9B%86%E5%99%A8">CMS收集器（并发收集器）</a></li>
+<li><a href="#g1%E6%94%B6%E9%9B%86%E5%99%A8">G1收集器</a></li>
+<li><a href="#%E5%85%B6%E4%BB%96%E6%94%B6%E9%9B%86%E5%99%A8">其他收集器</a></li>
+</ul>
+</li>
+<li><a href="#gc%E6%80%A7%E8%83%BD%E4%B8%8E%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE">GC性能与参数设置</a></li>
+</ul>
+<h1 id="垃圾回收基础"><a href="#垃圾回收基础" class="headerlink" title="垃圾回收基础"></a>垃圾回收基础</h1><ul>
+<li>什么是垃圾：内存中不在被使用到的内存空间就是垃圾。</li>
+</ul>
+<h2 id="引用计数法"><a href="#引用计数法" class="headerlink" title="引用计数法"></a>引用计数法</h2><p>在对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加一；当引用失效时，计数器值就减一；任何时刻计数器为零的对象就是不可能再被使用的。</p>
+<ul>
+<li>优点：实现简单、效率高；</li>
+<li>缺点：<strong>不能解决对象之间的循环引用</strong>。</li>
+</ul>
+<h2 id="可达性分析法（根搜索法）"><a href="#可达性分析法（根搜索法）" class="headerlink" title="可达性分析法（根搜索法）"></a>可达性分析法（根搜索法）</h2><p>通过一系列称为“GC Roots”的根对象作为起始节点集，从这些节点开始，根据引用关系向下搜索，搜索过程所走过的路径称为“引用链”，如果某个对象到GC Roots间没有任何引用链相连，则证明此对象是不可能再被使用的。</p>
+<ul>
+<li><p>能够作为GCroots的对象：<br>在虚拟机栈（栈帧局部变量）中引用的对象、方法区类静态属性的引用对象、方法区中常量引用的对象、本地方法栈中引用的对象。</p>
+</li>
+<li><p>具体实现上的优化</p>
+</li>
+</ul>
+<ol>
+<li><p>HotSpot中使用了<strong>OopMap</strong>的结构，保证准确快速完成GCroot的枚举。并且为了防止引用关系发生变化，设置了<strong>安全点</strong>，在安全点上进行记录和GC操作。到达安全点的方法也可以分为<strong>抢先式中断和主动式中断</strong>。抢先式式全部暂停，没有到达安全点的继续运行一下，这个方法几乎不被使用。主动式设置了标志位，在每个安全点出都查询标志位。并且还要检查Java堆的大小，确认是否有足够的内存分配资源。另外，存在<strong>安全区域</strong>，保证代码在这段区域中，引用关系不会变化。</p>
+</li>
+<li><p><strong>记忆集</strong>：用于记录从<strong>非收集区域</strong>指向<strong>收集区域</strong>的<strong>指针集合</strong>的抽象数据结构。记录跨代引用的情况。具体实现，卡表法。</p>
+</li>
+<li><p>写屏障：维护卡表状态。在引用类型字段赋值前后，执行写屏障，更新卡表。</p>
+</li>
+</ol>
+<h2 id="引用分类"><a href="#引用分类" class="headerlink" title="引用分类"></a>引用分类</h2><p><strong>强软弱虚</strong></p>
+<ul>
+<li><p>强引用：类似Object a = new A(）无论任何情况下，只要强引用关系还存在，垃圾收集器就永远不会回<br>收掉被引用的对象。</p>
+</li>
+<li><p>软引用：还有用但是并不必须。只被软引用关联着的对象，在系统将要发生内存溢出异常前，会把这些对象列进回收范围之中进行第二次回收，如果这次回收还没有足够的内存才会抛出内存溢出异常。</p>
+</li>
+<li><p>弱引用：非必须对象，被弱引用关联的对象只能生存到下一次垃圾收集发生为止。当垃圾收集器开始工作，无论当前内存是否足够，都会回收掉只被弱引用关联的对象。</p>
+</li>
+<li><p>虚引用：一个对象是否有虚引用的存在，完全不会对其生存时间构成影响，也无法通过虚引用来取得一个对象实例。为一个对象设置虚引用关联的唯一目的只是为了能在这个对象被收集器回收时收到一个系统通知</p>
+</li>
+</ul>
+<h2 id="判断垃圾的步骤"><a href="#判断垃圾的步骤" class="headerlink" title="判断垃圾的步骤"></a>判断垃圾的步骤</h2><ul>
+<li>实例垃圾</li>
+</ul>
+<ol>
+<li>根搜索算法判断不可用</li>
+<li>看看是否有必要执行finalize方法，只有第一次被回收时执行。</li>
+<li>两个步骤完成没人使用，属于垃圾。进行垃圾回收。</li>
+</ol>
+<ul>
+<li>类垃圾（同时满足）</li>
+</ul>
+<ol start="4">
+<li>JVM中该类的全部实例被回收</li>
+<li>加载该类的CLassLoader被回收</li>
+<li>没有任何地方引用该类的Class对象，无法在任何地方通过反射访问这个类</li>
+</ol>
+<p>可以进行类的卸载。</p>
+<h1 id="GC类型"><a href="#GC类型" class="headerlink" title="GC类型"></a>GC类型</h1><ul>
+<li>Minor GC：发生在新生代的GC</li>
+<li>MajorGC：发生在老年代的GC</li>
+<li>MixedGC：发生在新生代和部分老年代，G1</li>
+<li>FullGC：收集整个Java堆和方法区的GC</li>
+</ul>
+<p>尽量减少Stop-the-world的时间。</p>
+<h2 id="跨代引用"><a href="#跨代引用" class="headerlink" title="跨代引用"></a>跨代引用</h2><ul>
+<li>什么是跨代引用： 一个代的对象引用其他代中的对象。老年代中的对象引用新生代的对象。</li>
+<li>跨代引用假设：跨代引用相对于同代引用对象是极少数。</li>
+<li>隐含推论：相互引用关系的两个对象，倾向于同时生存或者同时消亡。</li>
+<li>优化解决方法：记忆集。<h2 id="垃圾收集类型："><a href="#垃圾收集类型：" class="headerlink" title="垃圾收集类型："></a>垃圾收集类型：</h2></li>
+<li>串行收集：GC单线程内存回收，暂停所有用户进程  Serial</li>
+<li>并行收集：多个GC线程并发工作，但是还是会暂停用户线程  Parallel</li>
+<li>并发收集：用户线程和GC线程同时（不一定并行，可能交替），用户线程不需要停顿。  CMS</li>
+</ul>
+<h2 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h2><h3 id="基础算法"><a href="#基础算法" class="headerlink" title="基础算法"></a>基础算法</h3><ul>
+<li>标记清除法：<br>标记所有垃圾，然后清理。<br>优点：简单<br>缺点：执行效率低，一个一个标记；内存空间碎片化</li>
+</ul>
+<ul>
+<li>标记复制算法：<br>一份为二，GC时候把存活的对象复制到一边，然后清空半区。<strong>用于回收新生代</strong>，新生代分为一块较大的Eden空间和两块较小的 Survivor空间，每次分配内存只使用Eden和其中一块Survivor。发生垃圾搜集时，将Eden和Survivor中仍然存活的对象一次性复制到另外一块Survivor空间上，然后直接清理掉Eden和已用过的那块Survivor空间。8：1：1。当Survivor空间不足以容纳一次Minor GC之后存活的对象时，就需要依赖其他内存区域（实际上大多就是老年代）进行<strong>分配担保</strong>。</li>
+<li>*缺点**：浪费了一半空间。</li>
+</ul>
+<ul>
+<li>标记整理法：<br>让所有存活的对象都向内存空间一端移动，然后直接清理掉边界以外的内存。移动存活对象并更新所有引用这些对象的地方将会是一种极为负重的操作，而且这种对象移动操作必须STW才能进行。<strong>老年代一般采用</strong></li>
+</ul>
+<h3 id="分配担保"><a href="#分配担保" class="headerlink" title="分配担保"></a>分配担保</h3><p>在发生Minor GC之前，虚拟机必须先检查老年代最大可用的连续空间是否大于新生代所有对象总<br>空间：</p>
+<ul>
+<li>如果这个条件成立，那这一次Minor GC可以确保是安全的。</li>
+<li>如果不成立，则虚拟机会先查看是否允许担保失败；<ul>
+<li>如果允许，那会继续检查老年代最大可用的连续空间是否大于历次晋升到老年代对象的平均大小，<ul>
+<li>如果大于，将尝试进行一次Minor GC，尽管这次Minor GC是有风险的；</li>
+<li>如果小于，或者不允许冒险，那这时就要改为进行一次Full GC。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="HotSpot收集器"><a href="#HotSpot收集器" class="headerlink" title="HotSpot收集器"></a>HotSpot收集器</h1><p><img src="https://img-blog.csdnimg.cn/20201017152928290.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="Serial-串行收集器"><a href="#Serial-串行收集器" class="headerlink" title="Serial 串行收集器"></a>Serial 串行收集器</h2><p>是一个<strong>单线程工作</strong>的收集器，但它的“单线程”的意义并不仅仅是说明它只会使用一个处理器或一条收集线程去完成垃圾收集工作，更重要的是强调在它进行垃圾收集时，<strong>必须暂停其他所有工作线程，直到它收集结束</strong>。</p>
+<p>简单，<strong>所有收集器中额外内存消耗最小的</strong>，<strong>默认client模式下新生代收集器。</strong>  <code>-XX:+UseSerialGC</code>开启。<strong>新生代是复制算法，老年代是标记整理算法</strong>。<br><img src="https://img-blog.csdnimg.cn/20201017153034521.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="PaNew-并行收集器"><a href="#PaNew-并行收集器" class="headerlink" title="PaNew 并行收集器"></a>PaNew 并行收集器</h2><p>是Serial收集器的多线程并行版本。服务端Server模式下首选的新生代收集器。和CMS配合。</p>
+<p><img src="https://img-blog.csdnimg.cn/20201017153519909.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="Parallel-Scavenge收集器-Parallel-Old"><a href="#Parallel-Scavenge收集器-Parallel-Old" class="headerlink" title="Parallel Scavenge收集器/Parallel Old"></a>Parallel Scavenge收集器/Parallel Old</h2><p>Parallel Scavenge收集器的特点是它的关注点与其他收集器不同，CMS等收集器的关注点是尽可能<br>地缩短垃圾收集时用户线程的<strong>停顿时间</strong>，而Parallel Scavenge收集器的目标则是达到一个可<strong>控制的吞吐量</strong>。</p>
+<p>停顿时间越短就越适合需要与用户交互或需要保证服务响应质量的程序，<strong>良好的响应速度能提升用户体验</strong>；而<strong>高吞吐量则可以最高效率地利用处理器资源</strong>，尽快完成程序的运算任务，主要适合在后台运算而不需要太多交互的分析任务。<br><img src="https://img-blog.csdnimg.cn/20201017153957419.png#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20201017154132884.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="CMS收集器（并发收集器）"><a href="#CMS收集器（并发收集器）" class="headerlink" title="CMS收集器（并发收集器）"></a>CMS收集器（并发收集器）</h2><p>CMS（Concurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器。CMS收集器是基于标记-清除算法。<code>-XX:UseConcMarkSwepGC</code>,使用ParNew+CMS+Serial Old组合。</p>
+<ul>
+<li>四个阶段：</li>
+</ul>
+<ol>
+<li><strong>初始标记</strong>： 只是标记一下GCRoots能直接关联到的对象，速度很快。<strong>需要STW。</strong></li>
+<li><strong>并发标记</strong>：从GC Roots的直接关联对象开始遍历整个对象图的过程，这个过程耗时较长但是不需要停顿用户线程，可以与垃圾收集线程一起并发运行</li>
+<li><strong>重新标记</strong>：修正并发标记期间，因用户程序继续运作而导致标记产生变动的那一部分对象的<br>标记记录。<strong>STW</strong></li>
+<li><strong>并发清除</strong>：最后是并发清除阶段，清理删除掉标记阶段判断的已经死亡的对象，由于不需要移动存活对象，所以这个阶段也是可以与用户线程<strong>同时并发</strong>的。</li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/20201017162754658.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li>优缺点：<br>优点：并发收集、低停顿。<br>缺点：对处理器资源敏感，并发执行的原因；无法处理浮动垃圾，也是因为并发（并发失败采用Serial old）；空间碎片化，大对象容易FullGC。</li>
+</ul>
+<h2 id="G1收集器"><a href="#G1收集器" class="headerlink" title="G1收集器"></a>G1收集器</h2><p>G1是一款主要面向服务端应用的垃圾收集器。<strong>新的服务端模式下的默认GC</strong>。<strong>在延迟可控的情况下获得尽可能高的吞吐量</strong>，但是<strong>G1收集器要比其他的传统垃圾收集器有着更高的内存占用负担。</strong></p>
+<ul>
+<li>特点：</li>
+</ul>
+<ol>
+<li>把连续的Java堆划分为多个大小相等的独立区域（Region）。</li>
+<li>保留了分代的思想，但是不再是物理隔离，而是一部分region 的集合。每一个Region都可以根据需要，扮演新生代的Eden空间、Survivor空间，或者老年代空间。Region中还有一类特殊的Humongous区域，专门用来<strong>存储大对象</strong>。</li>
+<li>充分利用多CPU，尽量缩短STW。</li>
+<li>整体上是标记整理算法，<strong>局部是复制算法</strong>。不会产生内存碎片。</li>
+<li>停顿可预测。每次寻找最多垃圾的region回收，每次收集到的内存空间都是Region大小的整数倍（mixedGC）</li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/20201017172523916.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li>四个步骤</li>
+</ul>
+<ol>
+<li>初始标记：标记一下GC Roots能直接关联到的对象，<strong>STW</strong></li>
+<li>并发标记：GC Root</li>
+<li>最终标记：<strong>STW</strong>，最终标记。</li>
+<li>筛选回收：在给定的时间内，寻找最大的价值region。<strong>STW</strong></li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/20201017173326311.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li>使用参数</li>
+</ul>
+<ol>
+<li><code>-XX:+UseG1GC</code> 开启G1，默认就是G1.</li>
+<li><code>-XX:MaxGCPauseMilis = n</code> 最大Gc停顿时间。</li>
+<li><code>-XX:InitiatingHeapOccupancyPercet = n</code> 占用多少空间比例时候，出发GC</li>
+<li><code>-XX:NewRatio = n</code> 默认为2 新生代和老年的比例</li>
+<li><code>-XX:SurvivorRatio = n</code> 默认为8  </li>
+<li><code>-XX:MaxTenuringThreshold = n</code>默认15，新生代到老年代的岁数。</li>
+</ol>
+<h2 id="其他收集器"><a href="#其他收集器" class="headerlink" title="其他收集器"></a>其他收集器</h2><ul>
+<li>ZGC收集器：暂停时间低；支持Tb级别内存，吞吐量影响下。</li>
+</ul>
+<h1 id="GC性能与参数设置"><a href="#GC性能与参数设置" class="headerlink" title="GC性能与参数设置"></a>GC性能与参数设置</h1><ul>
+<li>吞吐量：代码时间/GC时间。    反过来就是GC负荷</li>
+<li>STW时间</li>
+<li>GC频率：发生GC的次数。</li>
+<li>反应速度：从对象称为垃圾到被回收的时间</li>
+<li>低延迟：影响交互的时间最小。</li>
+</ul>
+<p>新生代的不能太小，容易导致频繁YGC，且进入老年代之后容易FGC。新生代的大小<strong>是整个堆的3/8到一半</strong>。</p>
+<p>老年代要适当，太小容易内存碎片，或者高频率FGC；太大了回收时间长。</p>
+<p>对象，对象在新生代Eden区中分配。当Eden区没有足够空间进行分配时，虚拟机将发起<br>一次Minor GC。<strong>大文件直接进入老年代，长期存活的对象直接进入老年代</strong>。</p>
+<p>动态年龄判断：<strong>如果在Survivor空间中相同年龄所有对象大小的总和大于Survivor空间的一半，年龄大于或等于该年龄的对象就可以直接进入老年代</strong></p>
+<ul>
+<li>经验：</li>
+</ul>
+<ol>
+<li><p>新生代的不能太小，容易导致频繁YGC，且进入老年代之后容易FGC。新生代的大小<strong>是整个堆的3/8到一半</strong>。</p>
+</li>
+<li><p>老年代要适当，太小容易内存碎片，或者高频率FGC；太大了回收时间长。</p>
+</li>
+<li><p>对于吞吐量优先的应用，设置大新生代和小老年代，尽快回收短期对象。</p>
+</li>
+<li><p>对象优先再新生代分配，长时间存活对象进入老年代。</p>
+</li>
+</ol>
+<p>合理选择，内存分配，收集器方法。</p>
+
+	
+   
+
+
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">机器学习</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JVM</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">垃圾回收</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/统计学习方法//" class="article-tag-list-link color2">统计学习方法</a>
+        			<a href="/categories/JAVA学习总结//" class="article-tag-list-link color4">JAVA学习总结</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2020/10/17/%E3%80%90JVM%E3%80%91%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part2-%E5%90%8E%E5%9B%9B%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">【统计学习算法】Part2, 后四章的学习笔记</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -293,10 +645,10 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
-		isCategory: true,
+		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
 		root: "/",
@@ -383,6 +735,22 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">JVM</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Java</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">随笔</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">垃圾回收</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">Leetcode</a>
               </li>
              
@@ -411,15 +779,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">JVM</a>
+                <a href="javascript:void(0)" class="js-tag color5">动态规划</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Java</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">随笔</a>
+                <a href="javascript:void(0)" class="js-tag color2">树</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -427,15 +791,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">回文串</a>
+                <a href="javascript:void(0)" class="js-tag color5">树形dp</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">状态压缩dp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">图</a>
+                <a href="javascript:void(0)" class="js-tag color5">分类dp</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -451,19 +811,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">树形dp</a>
+                <a href="javascript:void(0)" class="js-tag color4">回文串</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">分类dp</a>
+                <a href="javascript:void(0)" class="js-tag color2">状态压缩dp</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">树</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">动态规划</a>
+                <a href="javascript:void(0)" class="js-tag color2">图</a>
               </li>
              
               <li class="article-tag-list-item">

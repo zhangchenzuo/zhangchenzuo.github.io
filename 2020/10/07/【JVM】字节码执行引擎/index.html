@@ -10,16 +10,16 @@
   <link rel="dns-prefetch" href="http://example.com">
   <title>【JVM】字节码执行引擎 | 小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="《深入理解JAVA虚拟机》读书笔记系列之：  字节码执行引擎 栈帧、局部变量表和运行期间操作数栈的交互 方法调用、静态分配和动态分派  字节码执行引擎功能：输入字节码文件，然后对字节码进行解析并处理，最后输出执行的结果。实现方法：解释器直接解释或者即时编译生成本地代码，编译执行。">
+  <meta name="description" content="《深入理解JAVA虚拟机》读书笔记系列之：  字节码执行引擎 栈帧、局部变量表和运行期间操作数栈的交互 方法调用、静态分配和动态分派 解析调用 分派调用    字节码执行引擎功能：输入字节码文件，然后对字节码进行解析并处理，最后输出执行的结果。 实现方法：解释器直接解释或者即时编译生成本地代码，编译执行。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【JVM】字节码执行引擎">
 <meta property="og:url" content="http://example.com/2020/10/07/%E3%80%90JVM%E3%80%91%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
-<meta property="og:description" content="《深入理解JAVA虚拟机》读书笔记系列之：  字节码执行引擎 栈帧、局部变量表和运行期间操作数栈的交互 方法调用、静态分配和动态分派  字节码执行引擎功能：输入字节码文件，然后对字节码进行解析并处理，最后输出执行的结果。实现方法：解释器直接解释或者即时编译生成本地代码，编译执行。">
+<meta property="og:description" content="《深入理解JAVA虚拟机》读书笔记系列之：  字节码执行引擎 栈帧、局部变量表和运行期间操作数栈的交互 方法调用、静态分配和动态分派 解析调用 分派调用    字节码执行引擎功能：输入字节码文件，然后对字节码进行解析并处理，最后输出执行的结果。 实现方法：解释器直接解释或者即时编译生成本地代码，编译执行。">
 <meta property="og:locale">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/2020092419421498.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center">
 <meta property="article:published_time" content="2020-10-07T09:09:38.000Z">
-<meta property="article:modified_time" content="2020-10-10T11:56:53.103Z">
+<meta property="article:modified_time" content="2020-10-18T09:54:50.516Z">
 <meta property="article:author" content="Chenzuo Zhang">
 <meta property="article:tag" content="JVM">
 <meta property="article:tag" content="Java">
@@ -228,7 +228,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">783字</span>
+        <span class="post-count">928字</span>
       </span>
     </span>
 
@@ -237,7 +237,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-hourglass-half"></i>
         <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">2分</span>
+        <span class="post-count">3分</span>
       </span>
     </span>
 </div>
@@ -264,17 +264,24 @@
 <ul>
 <li><a href="#%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E">字节码执行引擎</a></li>
 <li><a href="#%E6%A0%88%E5%B8%A7%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F%E8%A1%A8%E5%92%8C%E8%BF%90%E8%A1%8C%E6%9C%9F%E9%97%B4%E6%93%8D%E4%BD%9C%E6%95%B0%E6%A0%88%E7%9A%84%E4%BA%A4%E4%BA%92">栈帧、局部变量表和运行期间操作数栈的交互</a></li>
-<li><a href="#%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E9%9D%99%E6%80%81%E5%88%86%E9%85%8D%E5%92%8C%E5%8A%A8%E6%80%81%E5%88%86%E6%B4%BE">方法调用、静态分配和动态分派</a></li>
+<li><a href="#%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E9%9D%99%E6%80%81%E5%88%86%E9%85%8D%E5%92%8C%E5%8A%A8%E6%80%81%E5%88%86%E6%B4%BE">方法调用、静态分配和动态分派</a><ul>
+<li><a href="#%E8%A7%A3%E6%9E%90%E8%B0%83%E7%94%A8">解析调用</a></li>
+<li><a href="#%E5%88%86%E6%B4%BE%E8%B0%83%E7%94%A8">分派调用</a></li>
 </ul>
-<h1 id="字节码执行引擎"><a href="#字节码执行引擎" class="headerlink" title="字节码执行引擎"></a>字节码执行引擎</h1><p>功能：输入字节码文件，然后对字节码进行解析并处理，最后输出执行的结果。<br>实现方法：解释器直接解释或者即时编译生成本地代码，编译执行。</p>
+</li>
+</ul>
+<h1 id="字节码执行引擎"><a href="#字节码执行引擎" class="headerlink" title="字节码执行引擎"></a>字节码执行引擎</h1><p>功能：输入字节码文件，然后对字节码进行解析并处理，最后输出执行的结果。</p>
+<p>实现方法：解释器直接解释或者即时编译生成本地代码，编译执行。</p>
 <a id="more"></a>
 
 <h1 id="栈帧、局部变量表和运行期间操作数栈的交互"><a href="#栈帧、局部变量表和运行期间操作数栈的交互" class="headerlink" title="栈帧、局部变量表和运行期间操作数栈的交互"></a>栈帧、局部变量表和运行期间操作数栈的交互</h1><ul>
-<li><p>栈帧：方法调用和方法执行，随着方法调用产生和结束。存储了<strong>局部变量，操作数栈，动态链接，方法返回地址</strong>等信息。<br><img src="https://img-blog.csdnimg.cn/2020092419421498.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</li>
-<li><p>局部变量表：</p>
-</li>
+<li>栈帧：方法调用和方法执行，随着方法调用产生和结束。存储了<strong>局部变量，操作数栈，动态链接，方法返回地址</strong>等信息。</li>
 </ul>
+<p><img src="https://img-blog.csdnimg.cn/2020092419421498.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li>局部变量表：</li>
+</ul>
+<p>局部变量表是一组变量值的存储空间，用于存放方法参数和方法内部定义的局部变量。六种数据类型+reference+returnAddress</p>
 <ol>
 <li>存放<strong>方法参数和方法内部的局部变量</strong>，以slot为单位。</li>
 <li>对于实例方法，0位存储的this；静态方法不会有this。</li>
@@ -284,22 +291,23 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">byte</span>[] placeholder = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">64</span> * <span class="number">1024</span> * <span class="number">1024</span>];</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 此时不会直接被GC回收，而是等再利用。</span></span><br><span class="line">	<span class="comment">// slot</span></span><br><span class="line">	<span class="comment">// 0 -- args</span></span><br><span class="line">	<span class="comment">// 1 -- placeholder</span></span><br><span class="line">	<span class="comment">// 2 -- a</span></span><br><span class="line">	<span class="keyword">int</span> a = <span class="number">0</span>;</span><br><span class="line">	System.gc();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <ul>
-<li><p>操作数栈：存放运行方法期间，各个操作指令的<strong>数据</strong>。每次都是操作栈顶的数据。虚拟机在实现栈帧时候可以能会优化，比如两个栈帧出现重叠的部分，存放公用的数据。。</p>
+<li><p>操作数栈：存放运行方法期间，各个操作指令的<strong>数据</strong>。每次都是操作栈顶的数据。虚拟机在实现栈帧时候可以能会优化，比如两个栈帧出现重叠的部分，存放公用的数据。</p>
 </li>
-<li><p>动连接接：每个栈帧持有一个指向<strong>运行时常量池中该栈帧所属方法的引用</strong>，以支持方法调用中的动态连接。<br>动态连接，运行期间转换为直接引用；静态链接，在类加载阶段或者第一次使用的时候就被转化为直接引用</p>
+<li><p>动连接接：每个栈帧持有一个指向<strong>运行时常量池中该栈帧所属方法的引用</strong>，以支持方法调用中的动态连接。</p>
+</li>
+<li><p>*动态连接，运行期间转换为直接引用；静态链接，在类加载阶段或者第一次使用的时候就被转化为直接引用**。</p>
 </li>
 <li><p>返回地址：方法执行以后返回的地址。程序被调用的位置。</p>
-<h1 id="方法调用、静态分配和动态分派"><a href="#方法调用、静态分配和动态分派" class="headerlink" title="方法调用、静态分配和动态分派"></a>方法调用、静态分配和动态分派</h1></li>
-<li><p>方法调用：具体确定调用哪个方法。一切方法调用在Class文件里面存储的都只是符号引用，而不是方法在实际运行时内存布局中的入口地址（也就是之前说的直接引用）。</p>
 </li>
 </ul>
-<p>解析调用是静态过程：</p>
+<h1 id="方法调用、静态分配和动态分派"><a href="#方法调用、静态分配和动态分派" class="headerlink" title="方法调用、静态分配和动态分派"></a>方法调用、静态分配和动态分派</h1><p>方法调用：具体确定调用哪个方法。一切方法调用在Class文件里面存储的都只是符号引用，而不是方法在实际运行时内存布局中的入口地址（也就是之前说的直接引用）。方法调用分为解析与分派。</p>
+<h2 id="解析调用"><a href="#解析调用" class="headerlink" title="解析调用"></a>解析调用</h2><p><strong>解析调用</strong>是静态过程：<br>在类加载的解析阶段，会将其中的一部分<strong>符号引用转化为直接引用</strong>，这种解析能够成立的前<br>提是：<strong>编译期可知，运行期不可变</strong>。</p>
 <p> 被<code>invokestatic</code>和<code>invokespecial</code>指令调用的方法，在解析阶段就确定。<strong>静态方法，私有方法，实例构造器，父类方法四种。再加上<code>final</code>修饰的方法</strong></p>
-<p>运行期动态委派：<br> 实例方法，也称虚方法，因为重载和多态，需要运行时确定。</p>
+<h2 id="分派调用"><a href="#分派调用" class="headerlink" title="分派调用"></a>分派调用</h2><p>运行期动态委派：<br> 实例方法，也称虚方法，因为重载和多态，需要运行时确定。</p>
 <ul>
 <li>分派：静态分派和动态分派</li>
 </ul>
-<p><strong>静态分配</strong>：以来静态类型来定位方法执行版本。比如<strong>重载</strong>。依赖于传入什么静态类型。</p>
+<p><strong>静态分配</strong>：以来<strong>静态类型</strong>来定位方法执行版本。比如<strong>重载</strong>。依赖于传入什么静态类型。发生在编译阶段，因此一些资料归入了解析而不是解析。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Human 称为变量的“静态类型，</span></span><br><span class="line"><span class="comment">//Man 则被称为变量的“实际类型”，这个在运行期才可以最终确定</span></span><br><span class="line">Human man = <span class="keyword">new</span> Man();</span><br><span class="line">Human woman = <span class="keyword">new</span> Woman();</span><br></pre></td></tr></table></figure>
 
 <p><strong>动态分派</strong>：根据运行期的实际类型分配，比如<strong>重写</strong>。依赖于传入的实例对象类型。</p>
@@ -584,7 +592,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">内存分配</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Java</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">垃圾回收</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">并发</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -592,7 +612,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">垃圾回收</a>
+                <a href="javascript:void(0)" class="js-tag color4">类加载</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -624,26 +644,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">动态规划</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">树</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">leetcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">树形dp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">分类dp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">优先队列</a>
               </li>
              
@@ -656,6 +656,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">leetcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">回文串</a>
               </li>
              
@@ -665,6 +669,22 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">图</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">动态规划</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">树</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">树形dp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">分类dp</a>
               </li>
              
               <li class="article-tag-list-item">

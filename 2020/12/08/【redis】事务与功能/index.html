@@ -8,21 +8,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>【redis】事务与功能 | 小张的技术小木屋</title>
+  <title>【redis】事务与性能 | 小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="本系列内容是对《Redis设计与实现》的读书笔记整理，简单整理了书中的重点内容。第四部分是对前面三个主要部分的补充，主要会从实际的使用中介绍redis的内容。包括事务，缓存问题，以及为什么要使用redis等问题。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【redis】事务与功能">
+<meta property="og:title" content="【redis】事务与性能">
 <meta property="og:url" content="http://example.com/2020/12/08/%E3%80%90redis%E3%80%91%E4%BA%8B%E5%8A%A1%E4%B8%8E%E5%8A%9F%E8%83%BD/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
 <meta property="og:description" content="本系列内容是对《Redis设计与实现》的读书笔记整理，简单整理了书中的重点内容。第四部分是对前面三个主要部分的补充，主要会从实际的使用中介绍redis的内容。包括事务，缓存问题，以及为什么要使用redis等问题。">
 <meta property="og:locale">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20201208173602355.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
 <meta property="article:published_time" content="2020-12-08T03:07:54.000Z">
-<meta property="article:modified_time" content="2020-12-08T03:09:38.789Z">
+<meta property="article:modified_time" content="2020-12-08T14:08:12.733Z">
 <meta property="article:author" content="Chenzuo Zhang">
 <meta property="article:tag" content="redis">
 <meta property="article:tag" content="数据库">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20201208173602355.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70">
   
     <link rel="alternative" href="/atom.xml" title="小张的技术小木屋" type="application/atom+xml">
   
@@ -202,7 +204,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      【redis】事务与功能
+      【redis】事务与性能
     </h1>
   
 
@@ -225,7 +227,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">927字</span>
+        <span class="post-count">2.2k字</span>
       </span>
     </span>
 
@@ -234,7 +236,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-hourglass-half"></i>
         <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">3分</span>
+        <span class="post-count">7分</span>
       </span>
     </span>
 </div>
@@ -259,15 +261,64 @@
 	
 		<p>本系列内容是对《Redis设计与实现》的读书笔记整理，简单整理了书中的重点内容。第四部分是对前面三个主要部分的补充，主要会从实际的使用中介绍redis的内容。包括事务，缓存问题，以及为什么要使用redis等问题。</p>
 <a id="more"></a>
-
 <ul>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%94%A8redis">为什么要用Redis</a></li>
+<li><a href="#nosql%E7%89%B9%E7%82%B9">NoSQL特点</a><ul>
+<li><a href="#%E5%8D%95%E6%9C%BAmysql">单机MySQL</a></li>
+<li><a href="#%E7%BC%93%E5%AD%98%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BBmysql">缓存（读写分离）+MySQL</a></li>
+<li><a href="#%E5%9E%82%E7%9B%B4%E6%8B%86%E5%88%86%E6%B0%B4%E5%B9%B3%E6%8B%86%E5%88%86%E9%9B%86%E7%BE%A4">垂直拆分+水平拆分+集群</a></li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E4%B8%B0%E5%AF%8C%E6%94%B9%E7%94%A8%E9%9D%9E%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93">数据类型丰富，改用非关系型数据库</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%E4%B8%8E%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9">缓存击穿、缓存穿透与缓存雪崩</a><ul>
+<li><a href="#%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F">缓存穿透</a></li>
+<li><a href="#%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF">缓存击穿</a></li>
+<li><a href="#%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9">缓存雪崩</a></li>
+</ul>
+</li>
 <li><a href="#%E5%8F%91%E5%B8%83%E4%B8%8E%E8%AE%A2%E9%98%85">发布与订阅</a></li>
 <li><a href="#%E4%BA%8B%E5%8A%A1">事务</a><ul>
 <li><a href="#watch%E5%91%BD%E4%BB%A4">WATCH命令</a></li>
-<li><a href="#acid%E6%80%A7%E8%B4%A8">ACID性质</a><h1 id="发布与订阅"><a href="#发布与订阅" class="headerlink" title="发布与订阅"></a>发布与订阅</h1>通过SUBSCRIBE命令，客户端可以订阅一个或者多个频道。或者通过PSUBSCRIBE订阅一个或者多个模式。</li>
+<li><a href="#acid%E6%80%A7%E8%B4%A8">ACID性质</a><h1 id="为什么要用Redis"><a href="#为什么要用Redis" class="headerlink" title="为什么要用Redis"></a>为什么要用Redis</h1></li>
 </ul>
 </li>
 </ul>
+<p>随着时代的发展，数据量逐渐加大。最开始是单机MySql时代，但是这种方式需要不断的查找数据库，效率低。因此考虑采用了缓存的方法。memecache。<br>后面开始考虑表的垂直切分，多数据库协同。到最后的集群。</p>
+<h1 id="NoSQL特点"><a href="#NoSQL特点" class="headerlink" title="NoSQL特点"></a>NoSQL特点</h1><p>NoSQL = NotOnly SQL。可以不需要传统MySQL的表行列。非关系数据库。<br>解耦！</p>
+<ol>
+<li>方便扩展（数据库之间没有关系，很好扩展！）</li>
+<li>大数据的高性能，基于缓存，读写速度很快</li>
+<li>数据类型多样，不需要事先设计数据库。</li>
+</ol>
+<p>Redis（remote dictionary sever）远程字典服务。基于内存，可以持久化的日志型、Key-Value数据库。</p>
+<h2 id="单机MySQL"><a href="#单机MySQL" class="headerlink" title="单机MySQL"></a>单机MySQL</h2><p>瓶颈：1.数据量太大，一个机器放不下；2.数据索引（B+tree），一个机器的内存放不下；3。访问量大（无法读写分离），一个服务器无法处理</p>
+<h2 id="缓存（读写分离）-MySQL"><a href="#缓存（读写分离）-MySQL" class="headerlink" title="缓存（读写分离）+MySQL"></a>缓存（读写分离）+MySQL</h2><p>利用缓存提高读效率，不用每次都进行数据库的查询。</p>
+<h2 id="垂直拆分-水平拆分-集群"><a href="#垂直拆分-水平拆分-集群" class="headerlink" title="垂直拆分+水平拆分+集群"></a>垂直拆分+水平拆分+集群</h2><p>分库分表，解决写的压力</p>
+<h2 id="数据类型丰富，改用非关系型数据库"><a href="#数据类型丰富，改用非关系型数据库" class="headerlink" title="数据类型丰富，改用非关系型数据库"></a>数据类型丰富，改用非关系型数据库</h2><p>关系型数据库不方便。采用redis为代表的非关系型数据库。</p>
+<p>键值对类型数据库：redis，主要是内存存储，查找速度快。<br>列存储数据库：HBase 分布式的分拣系统<br>文档型数据库：MongoDB</p>
+<h1 id="缓存击穿、缓存穿透与缓存雪崩"><a href="#缓存击穿、缓存穿透与缓存雪崩" class="headerlink" title="缓存击穿、缓存穿透与缓存雪崩"></a>缓存击穿、缓存穿透与缓存雪崩</h1><p>前台请求，后台先从缓存中取数据，取到直接返回结果，取不到时从数据库中取，数据库取到更新缓存，并返回结果，数据库也没取到，那直接返回空结果。<br><img src="https://img-blog.csdnimg.cn/20201208173602355.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3pjejU1NjY3MTk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h2><p>缓存穿透是指<strong>缓存和数据库中都没有的数据</strong>，而用户不断发起请求。由于缓存是不命中时被动写的，并且出于容错考虑，如果<strong>从存储层查不到数据则不写入缓存</strong>，这将导致这个不存在的数据每次请求都要到存储层去查询，失去了缓存的意义。</p>
+<p>在流量大时，可能DB就挂掉了，要是有人利用不存在的key频繁攻击我们的应用，这就是漏洞。</p>
+<p>如发起为id为“-1”的数据或id为特别大不存在的数据。这时的用户很可能是攻击者，攻击会导致数据库压力过大。</p>
+<p><strong>解决策略</strong>：<br>布隆过滤器：接口层增加校验，如用户鉴权校验，id做基础校验，id&lt;=0的直接拦截；</p>
+<p>缓存空对象：从缓存取不到的数据，在数据库中也没有取到，这时也可以将key-value对写为key-null，缓存有效时间可以设置短点，如30秒（设置太长会导致正常情况也没法使用）。这样可以防止攻击用户反复用同一个id暴力攻击。</p>
+<h2 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h2><p>缓存击穿是指<strong>缓存中没有但数据库中有的数据（一般是缓存时间到期）</strong>，这时由于并发用户特别多，同时读缓存没读到数据，又同时去数据库去取数据，引起数据库压力瞬间增大，造成过大压力。</p>
+<p> <strong>解决方案：</strong></p>
+<ol>
+<li>设置热点数据永远不过期，但是会增加空间消耗。</li>
+<li>接口限流与熔断，降级。重要的接口一定要做好限流策略，防止用户恶意刷接口，同时要降级准备，当接口中的某些服务不可用时候，进行熔断，失败快速返回机制。<ol start="3">
+<li><strong>布隆过滤器</strong>。bloomfilter就类似于一个hash set，用于快速判某个元素是否存在于集合中，其典型的应用场景就是快速判断一个key是否存在于某容器，不存在就直接返回。布隆过滤器的关键就在于hash算法和容器大小，</li>
+</ol>
+</li>
+<li><strong>加互斥锁</strong>，互斥锁。保证只有一个线程可以查询热点的key。<a target="_blank" rel="noopener" href="https://blog.csdn.net/fcvtb/article/details/89478554">参考代码</a></li>
+</ol>
+<h2 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h2><p>缓存雪崩是指<strong>缓存中数据大批量到过期时间，而查询数据量巨</strong>大，引起数据库压力过大甚至宕机。和缓存击穿不同的是， 缓存击穿指并发查同一条数据，缓存雪崩是不同数据都过期了，很多数据都查不到从而查数据库。</p>
+<p><strong>解决方案：</strong></p>
+<ol>
+<li>缓存数据的过期时间设置随机，防止同一时间大量数据过期现象发生。</li>
+<li>如果缓存数据库是分布式部署，将热点数据均匀分布在不同搞得缓存数据库中。</li>
+<li>设置热点数据永远不过期。<h1 id="发布与订阅"><a href="#发布与订阅" class="headerlink" title="发布与订阅"></a>发布与订阅</h1>通过SUBSCRIBE命令，客户端可以订阅一个或者多个频道。或者通过PSUBSCRIBE订阅一个或者多个模式。</li>
+</ol>
 <p>Redis中频道是采用了字典的形式，键的值是一个链表。每有新增加的订阅者，就把客户端添加到订阅者链表的尾部。而模式订阅采用了链表的结构，链表中的每个节点都包含了一个Pubsub Pattern结构。保存了客户端的名称和订阅的模式</p>
 <h1 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h1><p>通过MULTI、EXEC、WATCH等命令实现事务功能。在事务执行完毕旗舰，服务器不会中断事务而去执行其他客户端的命令请求。</p>
 <p>每个redis客户端都有自己的事务状态，这个事务状态保存在客户端状态（redisClient）中。事务状态包含一个事务状态和一个已入队命令计数器。事务队列采用先进先出的方式保存入队命令。在客户端向服务器发送EXEC命令之后，服务器会遍历这个事务ui列，执行命令。</p>
@@ -440,7 +491,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2020 Chenzuo Zhang
+    		&copy; 2021 Chenzuo Zhang
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
@@ -752,6 +803,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">归并</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">快速幂</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">递归</a>
               </li>
             
             <div class="clearfix"></div>

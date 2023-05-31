@@ -8,17 +8,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>小张的技术小木屋</title>
+  <title>【Spark源码解读】TaskSchedulerImpl | 小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
-<meta property="og:type" content="website">
-<meta property="og:title" content="小张的技术小木屋">
-<meta property="og:url" content="http://example.com/page/4/index.html">
+  <meta name="description" content="上一篇讲到DAGScheduler根据shuffle依赖对作业的整个计算链划分成多个stage之后，就开始提交最后一个ResultStage，而由于stage之间的依赖关系，实际上最终是循着计算链从上到下依次提交stage的。每提交一个stage，就会将这个stage分成多个Task，并且会计算每个Task的偏向位置，将RDD和ShuffleDependency，TaskMetrics等对象序列化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Spark源码解读】TaskSchedulerImpl">
+<meta property="og:url" content="http://example.com/2023/02/25/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
-<meta property="og:description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
+<meta property="og:description" content="上一篇讲到DAGScheduler根据shuffle依赖对作业的整个计算链划分成多个stage之后，就开始提交最后一个ResultStage，而由于stage之间的依赖关系，实际上最终是循着计算链从上到下依次提交stage的。每提交一个stage，就会将这个stage分成多个Task，并且会计算每个Task的偏向位置，将RDD和ShuffleDependency，TaskMetrics等对象序列化">
 <meta property="og:locale">
+<meta property="article:published_time" content="2023-02-25T02:31:48.000Z">
+<meta property="article:modified_time" content="2023-05-31T14:10:41.231Z">
 <meta property="article:author" content="Chenzuo Zhang">
-<meta property="article:tag" content="Java,Leetcode,工程师,代码,后端开发,大数据开发">
+<meta property="article:tag" content="Spark">
+<meta property="article:tag" content="Big Data">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="小张的技术小木屋" type="application/atom+xml">
@@ -192,525 +195,27 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-    <article id="post-【JVM】类加载机制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+            <article id="post-【Spark源码解读】TaskSchedulerImpl" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/18/%E3%80%90JVM%E3%80%91%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/">【JVM】类加载机制</a>
+    <h1 class="article-title" itemprop="name">
+      【Spark源码解读】TaskSchedulerImpl
     </h1>
   
 
         
         
+        <!-- 不蒜子统计 -->
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
 
-<a href="/2020/10/18/%E3%80%90JVM%E3%80%91%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" class="archive-article-date">
-  	<time datetime="2020-10-18T08:54:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-18</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">1.8k字</span>
-      </span>
-    </span>
 
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">6分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>本文介绍了JVM中的重要内容类加载机制。Java虚拟机把描述类的数据从Class文件加载到内存，并对数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这个过程被称作虚拟机的类加载机制。</p>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JVM</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">类加载</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/JAVA学习总结//" class="article-tag-list-link color4">JAVA学习总结</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/10/18/%E3%80%90JVM%E3%80%91%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【JVM】内存模型与优化并发操作" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/18/%E3%80%90JVM%E3%80%91%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E4%BC%98%E5%8C%96%E5%B9%B6%E5%8F%91%E6%93%8D%E4%BD%9C/">【JVM】内存模型与优化并发操作</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2020/10/18/%E3%80%90JVM%E3%80%91%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E4%BC%98%E5%8C%96%E5%B9%B6%E5%8F%91%E6%93%8D%E4%BD%9C/" class="archive-article-date">
-  	<time datetime="2020-10-18T08:49:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-18</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">889字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">3分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>介绍JVM对并发操作进行的优化和简单的JMM内容。</p>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JVM</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">并发</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/JAVA学习总结//" class="article-tag-list-link color4">JAVA学习总结</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/10/18/%E3%80%90JVM%E3%80%91%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E4%BC%98%E5%8C%96%E5%B9%B6%E5%8F%91%E6%93%8D%E4%BD%9C/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【JVM】垃圾回收机制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/17/%E3%80%90JVM%E3%80%91%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/">【JVM】垃圾回收机制</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2020/10/17/%E3%80%90JVM%E3%80%91%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" class="archive-article-date">
-  	<time datetime="2020-10-17T10:26:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-17</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">3.3k字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">11分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>《深入理解JAVA虚拟机》读书笔记系列之：垃圾回收机制。</p>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JVM</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">垃圾回收</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/JAVA学习总结//" class="article-tag-list-link color4">JAVA学习总结</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/10/17/%E3%80%90JVM%E3%80%91%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【统计学习算法】Part2-后四章的学习笔记" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part2-%E5%90%8E%E5%9B%9B%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">【统计学习算法】Part2, 后四章的学习笔记</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part2-%E5%90%8E%E5%9B%9B%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="archive-article-date">
-  	<time datetime="2020-10-13T09:16:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-13</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">2.6k字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">9分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>本文主要整理了在阅读李航的《统计学习方法》中的学习笔记，阅读过程中参考了很多前人的总结和分析，收获良多。在此无法一一感谢，很多笔记都是拾人牙慧，<strong>如有侵权，请告知我将进行修改</strong>。</p>
-<p>代码实现开源在我的 <a target="_blank" rel="noopener" href="https://github.com/zhangchenzuo/Statistical-Learning-Method-by-Python">Github</a>。</p>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">机器学习</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/统计学习算法//" class="article-tag-list-link color2">统计学习算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part2-%E5%90%8E%E5%9B%9B%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【统计学习算法】Part1， 前七章的学习笔记" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part1%EF%BC%8C%20%E5%89%8D%E4%B8%83%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">【统计学习算法】Part1，前七章的学习笔记</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part1%EF%BC%8C%20%E5%89%8D%E4%B8%83%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="archive-article-date">
-  	<time datetime="2020-10-13T08:53:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-13</time>
+<a href="/2023/02/25/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/" class="archive-article-date">
+  	<time datetime="2023-02-25T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-02-25</time>
 </a>
         <!-- 需要添加的位置 -->
         <!-- 开始添加字数统计-->
@@ -729,7 +234,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-hourglass-half"></i>
         <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">14分</span>
+        <span class="post-count">17分</span>
       </span>
     </span>
 </div>
@@ -740,6 +245,10 @@
         
 
   
+    <span class="archive-article-date">
+        阅读量 <span id="busuanzi_value_page_pv"></span>
+    </span>
+  
 
       </header>
     
@@ -747,696 +256,78 @@
   <div class="article-entry" itemprop="articleBody">
    
 
-			<p>本文主要整理了在阅读李航的《统计学习方法》中的学习笔记，阅读过程中参考了很多前人的总结和分析，收获良多。在此无法一一感谢，很多笔记都是拾人牙慧，<strong>如有侵权，请告知我将进行修改</strong>。</p>
-<p>代码实现开源在我的 <a target="_blank" rel="noopener" href="https://github.com/zhangchenzuo/Statistical-Learning-Method-by-Python">Github</a>。</p>
 	
-   
+		<p>上一篇讲到DAGScheduler根据shuffle依赖对作业的整个计算链划分成多个stage之后，就开始提交最后一个ResultStage，而由于stage之间的依赖关系，实际上最终是循着计算链从上到下依次提交stage的。每提交一个stage，就会将这个stage分成多个Task，并且会计算每个Task的偏向位置，将RDD和ShuffleDependency，TaskMetrics等对象序列化用于远程传输，最后把一个stage的所有Task包装成一个任务集，提交给TaskSchedulerImpl运行。本节就来分析一下这个TaskSchedulerImpl。</p>
+<a id="more"></a>
 
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">机器学习</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/统计学习算法//" class="article-tag-list-link color2">统计学习算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/10/13/%E3%80%90%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E3%80%91Part1%EF%BC%8C%20%E5%89%8D%E4%B8%83%E7%AB%A0%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【周赛总结】状态压缩Dp，回文串，flody算法" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/13/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%8A%B6%E6%80%81%E5%8E%8B%E7%BC%A9Dp%EF%BC%8C%E5%9B%9E%E6%96%87%E4%B8%B2%EF%BC%8Cflody%E7%AE%97%E6%B3%95/">【周赛总结】状态压缩Dp，回文串，flody算法</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2020/10/13/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%8A%B6%E6%80%81%E5%8E%8B%E7%BC%A9Dp%EF%BC%8C%E5%9B%9E%E6%96%87%E4%B8%B2%EF%BC%8Cflody%E7%AE%97%E6%B3%95/" class="archive-article-date">
-  	<time datetime="2020-10-13T02:42:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-13</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">1k字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">4分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>总结第210场周赛。</p>
 <ul>
-<li><a href="#1617-%E7%BB%9F%E8%AE%A1%E5%AD%90%E6%A0%91%E4%B8%AD%E5%9F%8E%E5%B8%82%E4%B9%8B%E9%97%B4%E6%9C%80%E5%A4%A7%E8%B7%9D%E7%A6%BB">1617. 统计子树中城市之间最大距离</a></li>
-<li><a href="#1616-%E5%88%86%E5%89%B2%E4%B8%A4%E4%B8%AA%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%BE%97%E5%88%B0%E5%9B%9E%E6%96%87%E4%B8%B2">1616. 分割两个字符串得到回文串</a></li>
-</ul>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">字符串</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">leetcode</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">回文串</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">状态压缩dp</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">图</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/周赛总结//" class="article-tag-list-link color5">周赛总结</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/10/13/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%8A%B6%E6%80%81%E5%8E%8B%E7%BC%A9Dp%EF%BC%8C%E5%9B%9E%E6%96%87%E4%B8%B2%EF%BC%8Cflody%E7%AE%97%E6%B3%95/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【每日一题】9-24-10-08-秋叶收藏集（分类dp），二叉树的后序遍历，树中最小遍历之和（树形Dp）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/08/%E3%80%90%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98%E3%80%919-24-10-08-%E7%A7%8B%E5%8F%B6%E6%94%B6%E8%97%8F%E9%9B%86%EF%BC%88%E5%88%86%E7%B1%BBdp%EF%BC%89%EF%BC%8C%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86%EF%BC%8C%E6%A0%91%E4%B8%AD%E6%9C%80%E5%B0%8F%E9%81%8D%E5%8E%86%E4%B9%8B%E5%92%8C%EF%BC%88%E6%A0%91%E5%BD%A2Dp%EF%BC%89/">【每日一题】9.24-10.08 秋叶收藏集（分类dp），二叉树的后序遍历，树中最小遍历之和（树形Dp）</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2020/10/08/%E3%80%90%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98%E3%80%919-24-10-08-%E7%A7%8B%E5%8F%B6%E6%94%B6%E8%97%8F%E9%9B%86%EF%BC%88%E5%88%86%E7%B1%BBdp%EF%BC%89%EF%BC%8C%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86%EF%BC%8C%E6%A0%91%E4%B8%AD%E6%9C%80%E5%B0%8F%E9%81%8D%E5%8E%86%E4%B9%8B%E5%92%8C%EF%BC%88%E6%A0%91%E5%BD%A2Dp%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2020-10-08T14:35:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-08</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">904字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">4分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>每日一题总结， 9.24-10.08.</p>
-<ul>
-<li><a href="#lcp-19-%E7%A7%8B%E5%8F%B6%E6%94%B6%E8%97%8F%E9%9B%86">LCP 19. 秋叶收藏集</a></li>
-<li><a href="#834-%E6%A0%91%E4%B8%AD%E8%B7%9D%E7%A6%BB%E4%B9%8B%E5%92%8C">834. 树中距离之和</a></li>
-<li><a href="#145-%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86">145. 二叉树的后序遍历</a></li>
-</ul>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">leetcode</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">树</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">树形dp</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">分类dp</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/每日一题//" class="article-tag-list-link color5">每日一题</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/10/08/%E3%80%90%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98%E3%80%919-24-10-08-%E7%A7%8B%E5%8F%B6%E6%94%B6%E8%97%8F%E9%9B%86%EF%BC%88%E5%88%86%E7%B1%BBdp%EF%BC%89%EF%BC%8C%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86%EF%BC%8C%E6%A0%91%E4%B8%AD%E6%9C%80%E5%B0%8F%E9%81%8D%E5%8E%86%E4%B9%8B%E5%92%8C%EF%BC%88%E6%A0%91%E5%BD%A2Dp%EF%BC%89/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【周赛总结】优先队列与有序集合，排序等" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/08/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97%E4%B8%8E%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88%EF%BC%8C%E6%8E%92%E5%BA%8F%E7%AD%89/">【周赛总结】优先队列与有序集合，排序等</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2020/10/08/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97%E4%B8%8E%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88%EF%BC%8C%E6%8E%92%E5%BA%8F%E7%AD%89/" class="archive-article-date">
-  	<time datetime="2020-10-08T13:12:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-08</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">1.4k字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">6分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>总结第36场双周赛和第209场周赛。一共5道题。</p>
-<ul>
-<li><a href="#1604-%E8%AD%A6%E5%91%8A%E4%B8%80%E5%B0%8F%E6%97%B6%E5%86%85%E4%BD%BF%E7%94%A8%E7%9B%B8%E5%90%8C%E5%91%98%E5%B7%A5%E5%8D%A1%E5%A4%A7%E4%BA%8E%E7%AD%89%E4%BA%8E%E4%B8%89%E6%AC%A1%E7%9A%84%E4%BA%BA-m">1604. 警告一小时内使用相同员工卡大于等于三次的人 M</a></li>
-<li><a href="#1605-%E7%BB%99%E5%AE%9A%E8%A1%8C%E5%92%8C%E5%88%97%E7%9A%84%E5%92%8C%E6%B1%82%E5%8F%AF%E8%A1%8C%E7%9F%A9%E9%98%B5-m">1605. 给定行和列的和求可行矩阵 M</a></li>
-<li><a href="#1606-%E6%89%BE%E5%88%B0%E5%A4%84%E7%90%86%E6%9C%80%E5%A4%9A%E8%AF%B7%E6%B1%82%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%99%A8-h">1606. 找到处理最多请求的服务器 H</a></li>
-<li><a href="#1610-%E5%8F%AF%E8%A7%81%E7%82%B9%E7%9A%84%E6%9C%80%E5%A4%A7%E6%95%B0%E7%9B%AE-h">1610. 可见点的最大数目 H</a></li>
-<li><a href="#1611-%E4%BD%BF%E6%95%B4%E6%95%B0%E5%8F%98%E4%B8%BA-0-%E7%9A%84%E6%9C%80%E5%B0%91%E6%93%8D%E4%BD%9C%E6%AC%A1%E6%95%B0-h">1611. 使整数变为 0 的最少操作次数 H</a>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Leetcode</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">优先队列</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">有序集合</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">贪心</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/周赛总结//" class="article-tag-list-link color5">周赛总结</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/10/08/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97%E4%B8%8E%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88%EF%BC%8C%E6%8E%92%E5%BA%8F%E7%AD%89/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【周赛总结】皇位继承顺序（多叉树）， 最多可达成的换楼请求（数位dp）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/08/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%9A%87%E4%BD%8D%E7%BB%A7%E6%89%BF%E9%A1%BA%E5%BA%8F%EF%BC%88%E5%A4%9A%E5%8F%89%E6%A0%91%EF%BC%89%EF%BC%8C%20%E6%9C%80%E5%A4%9A%E5%8F%AF%E8%BE%BE%E6%88%90%E7%9A%84%E6%8D%A2%E6%A5%BC%E8%AF%B7%E6%B1%82%EF%BC%88%E6%95%B0%E4%BD%8Ddp%EF%BC%89/">【周赛总结】皇位继承顺序（多叉树）， 最多可达成的换楼请求（数位dp）</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2020/10/08/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%9A%87%E4%BD%8D%E7%BB%A7%E6%89%BF%E9%A1%BA%E5%BA%8F%EF%BC%88%E5%A4%9A%E5%8F%89%E6%A0%91%EF%BC%89%EF%BC%8C%20%E6%9C%80%E5%A4%9A%E5%8F%AF%E8%BE%BE%E6%88%90%E7%9A%84%E6%8D%A2%E6%A5%BC%E8%AF%B7%E6%B1%82%EF%BC%88%E6%95%B0%E4%BD%8Ddp%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2020-10-08T12:16:32.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-08</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">534字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">2分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>总结第208场周赛。一共两道题目。</p>
-<ul>
-<li><a href="#1600-%E7%9A%87%E4%BD%8D%E7%BB%A7%E6%89%BF%E9%A1%BA%E5%BA%8F-m">1600 皇位继承顺序 M</a></li>
-<li><a href="#1601%E6%9C%80%E5%A4%9A%E5%8F%AF%E8%BE%BE%E6%88%90%E7%9A%84%E6%8D%A2%E6%A5%BC%E8%AF%B7%E6%B1%82-h">1601.最多可达成的换楼请求 H</a>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">leetcode</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">动态规划</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">树</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/周赛总结//" class="article-tag-list-link color5">周赛总结</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/10/08/%E3%80%90%E5%91%A8%E8%B5%9B%E6%80%BB%E7%BB%93%E3%80%91%E7%9A%87%E4%BD%8D%E7%BB%A7%E6%89%BF%E9%A1%BA%E5%BA%8F%EF%BC%88%E5%A4%9A%E5%8F%89%E6%A0%91%EF%BC%89%EF%BC%8C%20%E6%9C%80%E5%A4%9A%E5%8F%AF%E8%BE%BE%E6%88%90%E7%9A%84%E6%8D%A2%E6%A5%BC%E8%AF%B7%E6%B1%82%EF%BC%88%E6%95%B0%E4%BD%8Ddp%EF%BC%89/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【JVM】字节码执行引擎" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/07/%E3%80%90JVM%E3%80%91%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/">【JVM】字节码执行引擎</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2020/10/07/%E3%80%90JVM%E3%80%91%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/" class="archive-article-date">
-  	<time datetime="2020-10-07T09:09:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-07</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">1.1k字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">3分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>《深入理解JAVA虚拟机》读书笔记系列之：</p>
-<ul>
-<li><a href="#%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E">字节码执行引擎</a></li>
-<li><a href="#%E6%A0%88%E5%B8%A7%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F%E8%A1%A8%E5%92%8C%E8%BF%90%E8%A1%8C%E6%9C%9F%E9%97%B4%E6%93%8D%E4%BD%9C%E6%95%B0%E6%A0%88%E7%9A%84%E4%BA%A4%E4%BA%92">栈帧、局部变量表和运行期间操作数栈的交互</a></li>
-<li><a href="#%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E9%9D%99%E6%80%81%E5%88%86%E9%85%8D%E5%92%8C%E5%8A%A8%E6%80%81%E5%88%86%E6%B4%BE">方法调用、静态分配和动态分派</a><ul>
-<li><a href="#%E8%A7%A3%E6%9E%90%E8%B0%83%E7%94%A8">解析调用</a></li>
-<li><a href="#%E5%88%86%E6%B4%BE%E8%B0%83%E7%94%A8">分派调用</a></li>
+<li><a href="#taskschedulerimpl">TaskSchedulerImpl</a></li>
+<li><a href="#submittasks">submitTasks</a><ul>
+<li><a href="#coarsegrainedschedulerbackendreviveoffers">CoarseGrainedSchedulerBackend.reviveOffers</a></li>
+<li><a href="#driverendpointmakeoffers">DriverEndpoint.makeOffers</a></li>
 </ul>
 </li>
+<li><a href="#taskschedulerimplresourceoffers">TaskSchedulerImpl.resourceOffers</a><ul>
+<li><a href="#taskschedulerimplresourceoffersingletaskset">TaskSchedulerImpl.resourceOfferSingleTaskSet</a></li>
 </ul>
-<h1 id="字节码执行引擎"><a href="#字节码执行引擎" class="headerlink" title="字节码执行引擎"></a>字节码执行引擎</h1><p>功能：输入字节码文件，然后对字节码进行解析并处理，最后输出执行的结果。</p>
-<p>实现方法：解释器直接解释或者即时编译生成本地代码，编译执行。</p>
+</li>
+<li><a href="#tasksetmanagerresourceoffer">TaskSetManager.resourceOffer</a><ul>
+<li><a href="#%E5%B0%8F%E7%BB%93">小结</a></li>
+<li><a href="#driverendpointmakeoffers-1">DriverEndpoint.makeOffers</a></li>
+<li><a href="#driverendpointlaunchtasks">DriverEndpoint.launchTasks</a></li>
+</ul>
+</li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+<h1 id="TaskSchedulerImpl"><a href="#TaskSchedulerImpl" class="headerlink" title="TaskSchedulerImpl"></a>TaskSchedulerImpl</h1><p>首先把TaskSchedulerImpl的说明翻译一下：TaskSchedulerImpl的主要作用是调度Task，内部通过SchedulerBackend进行实际任务的传输。不同的集群类型对应不同的具体的调度后端的实现，例如本地模式的调度后端实现是LocalSchedulerBackend，而任务调度器的实现只有一种就是TaskSchedulerImpl。TaskSchedulerImpl主要处理一些通用的逻辑，例如在多个作业之间决定调度顺序，执行推测执行的逻辑等等。</p>
+<p>TaskSchedulerImpl在使用之前应该先调用<code>initialize()</code> 和 <code>start()</code>方法，然后再提交任务集。</p>
+<p>这里插一句，这两个方法分别在上面地方调用呢？都是在SparkContext初始化的时候调用的，具体可以看SparkContext初始化代码。</p>
+<p>关于线程安全的一些提示：由于会存在多线程同时提交任务的情况，所以面向外部的public的方法必须加锁以保持内部状态量，簿记量的一致性。</p>
+<p>此外，一些SchedulerBackend的方法会先获取自身的锁，然后获取TaskSchedulerImpl对象的锁，所有应该避免在持有TaskSchedulerImpl对象的锁的情况下再尝试获取调度后端的锁，这样会造成死锁。实际上这句话的意思就是因为有些操作需要同时持有调度后端的锁和TaskSchedulerImpl锁，对于这种需要同时持有多把锁的情况，应该保持获取锁的顺序是一致的，这样就能避免出现死锁的情况。</p>
+<p>好了，接下来我们接着任务提交的逻辑继续分析。</p>
+<h1 id="submitTasks"><a href="#submitTasks" class="headerlink" title="submitTasks"></a>submitTasks</h1><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">submitTasks</span></span>(taskSet: <span class="type">TaskSet</span>) &#123;</span><br><span class="line">  <span class="keyword">val</span> tasks = taskSet.tasks</span><br><span class="line">  logInfo(<span class="string">&quot;Adding task set &quot;</span> + taskSet.id + <span class="string">&quot; with &quot;</span> + tasks.length + <span class="string">&quot; tasks&quot;</span>)</span><br><span class="line">  <span class="comment">// 加锁，更新一些簿记量和状态量</span></span><br><span class="line">  <span class="keyword">this</span>.synchronized &#123;</span><br><span class="line">    <span class="comment">// 创建一个TaskSetManager，对Task集的进一步封装</span></span><br><span class="line">    <span class="keyword">val</span> manager = createTaskSetManager(taskSet, maxTaskFailures)</span><br><span class="line">    <span class="keyword">val</span> stage = taskSet.stageId</span><br><span class="line">    <span class="comment">// 更新stageId和TaskSetManager的映射关系，由于失败重试机制，一个stage可能会被多次尝试</span></span><br><span class="line">    <span class="keyword">val</span> stageTaskSets =</span><br><span class="line">      taskSetsByStageIdAndAttempt.getOrElseUpdate(stage, <span class="keyword">new</span> <span class="type">HashMap</span>[<span class="type">Int</span>, <span class="type">TaskSetManager</span>])</span><br><span class="line">    <span class="comment">// 将本次尝试的TaskSetManager添加到映射中</span></span><br><span class="line">    stageTaskSets(taskSet.stageAttemptId) = manager</span><br><span class="line">    <span class="comment">// 检测是否有还在运行的stage尝试，如果有就是重复提交了，需要抛出一个异常</span></span><br><span class="line">    <span class="keyword">val</span> conflictingTaskSet = stageTaskSets.exists &#123; <span class="keyword">case</span> (_, ts) =&gt;</span><br><span class="line">      ts.taskSet != taskSet &amp;&amp; !ts.isZombie</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (conflictingTaskSet) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">IllegalStateException</span>(<span class="string">s&quot;more than one active taskSet for stage <span class="subst">$stage</span>:&quot;</span> +</span><br><span class="line">        <span class="string">s&quot; <span class="subst">$&#123;stageTaskSets.toSeq.map&#123;_._2.taskSet.id&#125;</span>.mkString(&quot;</span>,<span class="string">&quot;)&#125;&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 将新创建的TaskSetManager添加到调度池中，调度池决定了如果存在多个TaskSet在排队应该如何进行排序，</span></span><br><span class="line">    <span class="comment">// 可以通过taskSet.properties设置队列名称，taskSet.properties是通过SparkContext的一个ThreadLocal变量设置的</span></span><br><span class="line">    schedulableBuilder.addTaskSetManager(manager, manager.taskSet.properties)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 启动一个定时任务打印提示信息</span></span><br><span class="line">    <span class="keyword">if</span> (!isLocal &amp;&amp; !hasReceivedTask) &#123;</span><br><span class="line">      starvationTimer.scheduleAtFixedRate(<span class="keyword">new</span> <span class="type">TimerTask</span>() &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">run</span></span>() &#123;</span><br><span class="line">          <span class="keyword">if</span> (!hasLaunchedTask) &#123;</span><br><span class="line">            logWarning(<span class="string">&quot;Initial job has not accepted any resources; &quot;</span> +</span><br><span class="line">              <span class="string">&quot;check your cluster UI to ensure that workers are registered &quot;</span> +</span><br><span class="line">              <span class="string">&quot;and have sufficient resources&quot;</span>)</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">this</span>.cancel()</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;, <span class="type">STARVATION_TIMEOUT_MS</span>, <span class="type">STARVATION_TIMEOUT_MS</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    hasReceivedTask = <span class="literal">true</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 到这里，锁已经释放</span></span><br><span class="line">  <span class="comment">// 通知调度后端有任务可以运行了，</span></span><br><span class="line">  backend.reviveOffers()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总结<code>submitTask</code>做的事情</p>
+<ul>
+<li>获取锁，更新一些簿记量</li>
+<li>将新的任务集封装为<code>TaskSetManager</code>添加到调度池中</li>
+<li>调用<code>SchedulerBackEnd.reviveOffers()</code>，给任务分配可用资源</li>
+</ul>
+<h2 id="CoarseGrainedSchedulerBackend-reviveOffers"><a href="#CoarseGrainedSchedulerBackend-reviveOffers" class="headerlink" title="CoarseGrainedSchedulerBackend.reviveOffers"></a>CoarseGrainedSchedulerBackend.reviveOffers</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">reviveOffers</span></span>() &#123;</span><br><span class="line">  driverEndpoint.send(<span class="type">ReviveOffers</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个方法通过rpc模块给<code>DriverEndPoint</code>发送一个消息，本地进程内调用rpc方法，主要是为了代码模块的统一。 在DriverEndpoint.receive方法中，我们可以看到，在接收到ReviveOffers消息后，就会调用makeOffers方法，</p>
+<h2 id="DriverEndpoint-makeOffers"><a href="#DriverEndpoint-makeOffers" class="headerlink" title="DriverEndpoint.makeOffers"></a>DriverEndpoint.makeOffers</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">makeOffers</span></span>() &#123;</span><br><span class="line">  <span class="comment">// Make sure no executor is killed while some task is launching on it</span></span><br><span class="line">  <span class="comment">// 获取锁，同步</span></span><br><span class="line">  <span class="keyword">val</span> taskDescs = <span class="type">CoarseGrainedSchedulerBackend</span>.<span class="keyword">this</span>.synchronized &#123;</span><br><span class="line">    <span class="comment">// 过滤掉正在被杀死的executor</span></span><br><span class="line">    <span class="keyword">val</span> activeExecutors = executorDataMap.filterKeys(executorIsAlive)</span><br><span class="line">    <span class="comment">// 把所有可用的executor封装成资源对象</span></span><br><span class="line">    <span class="keyword">val</span> workOffers = activeExecutors.map &#123;</span><br><span class="line">      <span class="keyword">case</span> (id, executorData) =&gt;</span><br><span class="line">        <span class="keyword">new</span> <span class="type">WorkerOffer</span>(id, executorData.executorHost, executorData.freeCores)</span><br><span class="line">    &#125;.toIndexedSeq</span><br><span class="line">    <span class="comment">// 把这些可用的资源交给TaskSchedulerImpl进行调度</span></span><br><span class="line">    <span class="comment">// TaskSchedulerImpl会综合考虑任务本地性，黑名单，调度池的调度顺序等因素，返回TaskDescription集合</span></span><br><span class="line">    <span class="comment">// TaskDescription对象是对一个Task的完整描述，</span></span><br><span class="line">    <span class="comment">// 包括序列化的任务数据，任务在哪个executor上运行，依赖文件和jar包等信息</span></span><br><span class="line">    scheduler.resourceOffers(workOffers)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (!taskDescs.isEmpty) &#123;</span><br><span class="line">    launchTasks(taskDescs)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个方法主要是将当前所有可用的资源（executor）封装成资源对象（WorkerOffer）交给<code>TaskSchedulerImpl</code>，<code>TaskSchedulerImpl</code>会综合考虑<strong>任务本地性，黑名单，调度池的调度顺序</strong>等因素，返回<code>TaskDescription</code>集合。</p>
+<p>TaskDescription对象是对一个Task的完整描述，包括序列化的任务数据，任务在哪个executor上运行，依赖文件和jar包等信息。</p>
+<p>从这里也可以看出，SchedulerBackend的职责其实相对比较少，主要是对executor的管理，以及调用rpc远端服务的引用发送任务数据，大部分的调度工作还是由TaskSchedulerImpl来完成。</p>
+<p>接下来我们分析一下Task调度最重要的一个方法，<code>TaskSchedulerImpl.resourceOffers</code></p>
+<h1 id="TaskSchedulerImpl-resourceOffers"><a href="#TaskSchedulerImpl-resourceOffers" class="headerlink" title="TaskSchedulerImpl.resourceOffers"></a>TaskSchedulerImpl.resourceOffers</h1><p>这个方法由 <code>SchedulerBackend</code>调用，<code>SchedulerBackend</code>会将可用的executor资源告诉<code>TaskSchedulerImpl</code>，<code>TaskSchedulerImpl</code>根据TaskSet优先级（调度池），黑名单，本地性等因素给出要实际运行的任务。我们使用round-robin的方式将任务分配到各个executor上，以使得计算资源的 使用更均衡。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">resourceOffers</span></span>(offers: <span class="type">IndexedSeq</span>[<span class="type">WorkerOffer</span>]): <span class="type">Seq</span>[<span class="type">Seq</span>[<span class="type">TaskDescription</span>]] = synchronized &#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 标记是否有新的可用executor加入</span></span><br><span class="line">  <span class="keyword">var</span> newExecAvail = <span class="literal">false</span></span><br><span class="line">  <span class="comment">// 这个循环主要目的是两个：</span></span><br><span class="line">  <span class="comment">// 1. 更新一些簿记量，如物理节点和executor的相互映射关系，机架和host的映射关系，host和executor上运行的任务信息等等</span></span><br><span class="line">  <span class="comment">// 2. 检查是否有新的可用executor加入</span></span><br><span class="line">  <span class="keyword">for</span> (o &lt;- offers) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!hostToExecutors.contains(o.host)) &#123;</span><br><span class="line">      hostToExecutors(o.host) = <span class="keyword">new</span> <span class="type">HashSet</span>[<span class="type">String</span>]()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!executorIdToRunningTaskIds.contains(o.executorId)) &#123;</span><br><span class="line">      hostToExecutors(o.host) += o.executorId</span><br><span class="line">      executorAdded(o.executorId, o.host)</span><br><span class="line">      executorIdToHost(o.executorId) = o.host</span><br><span class="line">      executorIdToRunningTaskIds(o.executorId) = <span class="type">HashSet</span>[<span class="type">Long</span>]()</span><br><span class="line">      newExecAvail = <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (rack &lt;- getRackForHost(o.host)) &#123;</span><br><span class="line">      hostsByRack.getOrElseUpdate(rack, <span class="keyword">new</span> <span class="type">HashSet</span>[<span class="type">String</span>]()) += o.host</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 触发黑名单的超时检查，被加入黑明单的节点或executor是由一定超时时间的，</span></span><br><span class="line">  <span class="comment">// 在超时时间内不能像他们提交任务，而过了超时时间，这些资源将被重新投入使用</span></span><br><span class="line">  blacklistTrackerOpt.foreach(_.applyBlacklistTimeout())</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 根据最新的黑名单过滤掉在黑名单中的计算资源，包括host和executor</span></span><br><span class="line">  <span class="keyword">val</span> filteredOffers = blacklistTrackerOpt.map &#123; blacklistTracker =&gt;</span><br><span class="line">    offers.filter &#123; offer =&gt;</span><br><span class="line">      !blacklistTracker.isNodeBlacklisted(offer.host) &amp;&amp;</span><br><span class="line">        !blacklistTracker.isExecutorBlacklisted(offer.executorId)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;.getOrElse(offers)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 对资源进行混洗，使得分配更加均匀，使用scala库的Random进行混洗</span></span><br><span class="line">  <span class="keyword">val</span> shuffledOffers = shuffleOffers(filteredOffers)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 给每个work分配对应的task list</span></span><br><span class="line">  <span class="comment">// 每个executor能分配多少个任务，cores / CPUS_PER_TASK</span></span><br><span class="line">  <span class="keyword">val</span> tasks = shuffledOffers.map(o =&gt; <span class="keyword">new</span> <span class="type">ArrayBuffer</span>[<span class="type">TaskDescription</span>](o.cores / <span class="type">CPUS_PER_TASK</span>))</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 每个executor提供的cpu核数</span></span><br><span class="line">  <span class="keyword">val</span> availableCpus = shuffledOffers.map(o =&gt; o.cores).toArray</span><br><span class="line">  <span class="comment">// 通过调度池对所有的任务集按优先级进行排序，获取排序后的任务集</span></span><br><span class="line">  <span class="keyword">val</span> sortedTaskSets = rootPool.getSortedTaskSetQueue</span><br><span class="line">  <span class="comment">// 如果有新的executor加入，需要通知每个TaskSetManager</span></span><br><span class="line">  <span class="keyword">for</span> (taskSet &lt;- sortedTaskSets) &#123;</span><br><span class="line">    logDebug(<span class="string">&quot;parentName: %s, name: %s, runningTasks: %s&quot;</span>.format(</span><br><span class="line">      taskSet.parent.name, taskSet.name, taskSet.runningTasks))</span><br><span class="line">    <span class="keyword">if</span> (newExecAvail) &#123;</span><br><span class="line">      taskSet.executorAdded()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 按照调度顺序，对于每个任务集合，按照本地性级别递增的顺序向每个节点提供机会，以便它们有机会在所有节点上启动本地任务。</span></span><br><span class="line">  <span class="comment">// <span class="doctag">NOTE:</span> 本地性级别: PROCESS_LOCAL, NODE_LOCAL, NO_PREF, RACK_LOCAL, ANY</span></span><br><span class="line">  <span class="comment">// 对于每一个任务集，为其分配资源</span></span><br><span class="line">  <span class="keyword">for</span> (taskSet &lt;- sortedTaskSets) &#123;</span><br><span class="line">    <span class="keyword">var</span> launchedAnyTask = <span class="literal">false</span></span><br><span class="line">    <span class="keyword">var</span> launchedTaskAtCurrentMaxLocality = <span class="literal">false</span></span><br><span class="line">    <span class="comment">// 本地性从低到高的顺序</span></span><br><span class="line">    <span class="keyword">for</span> (currentMaxLocality &lt;- taskSet.myLocalityLevels) &#123;</span><br><span class="line">      <span class="comment">// 每个本地性级别会进行多轮分配，</span></span><br><span class="line">      <span class="comment">// 每一轮依次轮询每个executor，每个executor分配一个任务，</span></span><br><span class="line">      <span class="comment">// 这样一轮下来每个executor都会分配到一个任务，显然大多数情况下，executor的资源是不会被占满的</span></span><br><span class="line">      <span class="comment">// 没关系，我们会接着进行第二轮分配，知道没有资源或者在当前的本地性级别下任务被分配完了，就跳出循环</span></span><br><span class="line">      do &#123;</span><br><span class="line">        launchedTaskAtCurrentMaxLocality = resourceOfferSingleTaskSet(</span><br><span class="line">          taskSet, currentMaxLocality, shuffledOffers, availableCpus, tasks)</span><br><span class="line">        launchedAnyTask |= launchedTaskAtCurrentMaxLocality</span><br><span class="line">      &#125; <span class="keyword">while</span> (launchedTaskAtCurrentMaxLocality)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!launchedAnyTask) &#123;</span><br><span class="line">      taskSet.abortIfCompletelyBlacklisted(hostToExecutors)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (tasks.size &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    hasLaunchedTask = <span class="literal">true</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> tasks</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>更新一些簿记量，如物理节点和executor的相互映射关系，机架和host的映射关系，host和executor上运行的任务信息等等; 检查是否有新的可用executor加入</li>
+<li>触发黑名单的超时检查，被加入黑明单的节点或executor是由一定超时时间的，在超时时间内不能像他们提交任务，而过了超时时间，这些资源将被重新投入使用; 根据最新的黑名单过滤掉在黑名单中的计算资源，包括host和executor</li>
+<li>通过调度池对所有的任务集按优先级进行排序，获取排序后的任务集</li>
+<li>对于每一个任务集，按照对executor进行round-robin的方式分配任务，会进行多轮分配，每一轮依次轮询所有的executor，为每一个executor分配一个符合本地性要求的任务</li>
+</ul>
+<h2 id="TaskSchedulerImpl-resourceOfferSingleTaskSet"><a href="#TaskSchedulerImpl-resourceOfferSingleTaskSet" class="headerlink" title="TaskSchedulerImpl.resourceOfferSingleTaskSet"></a>TaskSchedulerImpl.resourceOfferSingleTaskSet</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">resourceOfferSingleTaskSet</span></span>(</span><br><span class="line">  taskSet: <span class="type">TaskSetManager</span>,</span><br><span class="line">  maxLocality: <span class="type">TaskLocality</span>,</span><br><span class="line">  shuffledOffers: <span class="type">Seq</span>[<span class="type">WorkerOffer</span>],</span><br><span class="line">  availableCpus: <span class="type">Array</span>[<span class="type">Int</span>],</span><br><span class="line">  tasks: <span class="type">IndexedSeq</span>[<span class="type">ArrayBuffer</span>[<span class="type">TaskDescription</span>]]) : <span class="type">Boolean</span> = &#123;</span><br><span class="line">  <span class="keyword">var</span> launchedTask = <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 轮询每一个executor，分别为其分配一个Task</span></span><br><span class="line">  <span class="keyword">for</span> (i &lt;- <span class="number">0</span> until shuffledOffers.size) &#123;</span><br><span class="line">    <span class="keyword">val</span> execId = shuffledOffers(i).executorId</span><br><span class="line">    <span class="keyword">val</span> host = shuffledOffers(i).host</span><br><span class="line">    <span class="comment">// 检查这个executor上的cpu资源是否够用</span></span><br><span class="line">    <span class="keyword">if</span> (availableCpus(i) &gt;= <span class="type">CPUS_PER_TASK</span>) &#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 根据最大允许的本地性级别取出能够在这个executor上执行的任务，</span></span><br><span class="line">        <span class="keyword">for</span> (task &lt;- taskSet.resourceOffer(execId, host, maxLocality)) &#123;</span><br><span class="line">          <span class="comment">// 如果能够找出一个可以在这个executor上运行的符合本地性要求的任务，</span></span><br><span class="line">          <span class="comment">// 将这个任务加入传进来的集合中</span></span><br><span class="line">          tasks(i) += task</span><br><span class="line">          <span class="keyword">val</span> tid = task.taskId</span><br><span class="line">          taskIdToTaskSetManager(tid) = taskSet</span><br><span class="line">          taskIdToExecutorId(tid) = execId</span><br><span class="line">          executorIdToRunningTaskIds(execId).add(tid)</span><br><span class="line">          availableCpus(i) -= <span class="type">CPUS_PER_TASK</span></span><br><span class="line">          assert(availableCpus(i) &gt;= <span class="number">0</span>)</span><br><span class="line">          launchedTask = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> e: <span class="type">TaskNotSerializableException</span> =&gt;</span><br><span class="line">          logError(<span class="string">s&quot;Resource offer failed, task set <span class="subst">$&#123;taskSet.name&#125;</span> was not serializable&quot;</span>)</span><br><span class="line">          <span class="keyword">return</span> launchedTask</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> launchedTask</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个方法就是对所有可用的executor进行一轮round-robin方式的分配，一轮分配中，每个executor最多只能得到一个任务，这样做是为了尽量将任务“打散”，均匀第“撒到”所有executor上。</p>
+<p>每一个executor会根据本地性，找到适合自己的task。</p>
+<h1 id="TaskSetManager-resourceOffer"><a href="#TaskSetManager-resourceOffer" class="headerlink" title="TaskSetManager.resourceOffer"></a>TaskSetManager.resourceOffer</h1><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@throws</span>[<span class="type">TaskNotSerializableException</span>]</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">resourceOffer</span></span>(</span><br><span class="line">  execId: <span class="type">String</span>,</span><br><span class="line">  host: <span class="type">String</span>,</span><br><span class="line">  maxLocality: <span class="type">TaskLocality</span>.<span class="type">TaskLocality</span>)</span><br><span class="line">: <span class="type">Option</span>[<span class="type">TaskDescription</span>] =</span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// 首先检查黑名单</span></span><br><span class="line">  <span class="keyword">val</span> offerBlacklisted = taskSetBlacklistHelperOpt.exists &#123; blacklist =&gt;</span><br><span class="line">    blacklist.isNodeBlacklistedForTaskSet(host) ||</span><br><span class="line">      blacklist.isExecutorBlacklistedForTaskSet(execId)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!isZombie &amp;&amp; !offerBlacklisted) &#123;</span><br><span class="line">    <span class="keyword">val</span> curTime = clock.getTimeMillis()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> allowedLocality = maxLocality</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根据本地性等待时间重新计算本地性级别</span></span><br><span class="line">    <span class="keyword">if</span> (maxLocality != <span class="type">TaskLocality</span>.<span class="type">NO_PREF</span>) &#123;</span><br><span class="line">      allowedLocality = getAllowedLocalityLevel(curTime)</span><br><span class="line">      <span class="keyword">if</span> (allowedLocality &gt; maxLocality) &#123;</span><br><span class="line">        <span class="comment">// We&#x27;re not allowed to search for farther-away tasks</span></span><br><span class="line">        allowedLocality = maxLocality</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 找出一个在指定的本地性级别下，能够在这个executor上运行的任务</span></span><br><span class="line">    dequeueTask(execId, host, allowedLocality).map &#123; <span class="keyword">case</span> ((index, taskLocality, speculative)) =&gt;</span><br><span class="line">      <span class="keyword">val</span> task = tasks(index)</span><br><span class="line">      <span class="comment">// 分配一个taskId</span></span><br><span class="line">      <span class="keyword">val</span> taskId = sched.newTaskId()</span><br><span class="line">      <span class="comment">// 更新一些簿记量</span></span><br><span class="line">      copiesRunning(index) += <span class="number">1</span></span><br><span class="line">      <span class="comment">// task的尝试次数</span></span><br><span class="line">      <span class="keyword">val</span> attemptNum = taskAttempts(index).size</span><br><span class="line">      <span class="keyword">val</span> info = <span class="keyword">new</span> <span class="type">TaskInfo</span>(taskId, index, attemptNum, curTime,</span><br><span class="line">        execId, host, taskLocality, speculative)</span><br><span class="line">      taskInfos(taskId) = info</span><br><span class="line">      <span class="comment">// 记录每次尝试的任务信息</span></span><br><span class="line">      taskAttempts(index) = info :: taskAttempts(index)</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 更新本地性信息和事件信息用于计算本地性等待时间</span></span><br><span class="line">      <span class="comment">// 而对于没有本地性偏好的任务则不会影响这些簿记量</span></span><br><span class="line">      <span class="keyword">if</span> (maxLocality != <span class="type">TaskLocality</span>.<span class="type">NO_PREF</span>) &#123;</span><br><span class="line">        currentLocalityIndex = getLocalityIndex(taskLocality)</span><br><span class="line">        lastLaunchTime = curTime</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 对task进行序列化</span></span><br><span class="line">      <span class="keyword">val</span> serializedTask: <span class="type">ByteBuffer</span> = <span class="keyword">try</span> &#123;</span><br><span class="line">        ser.serialize(task)</span><br><span class="line">      &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">        <span class="comment">// 如果当前的无法序列化，就抛弃整个taskset</span></span><br><span class="line">        <span class="keyword">case</span> <span class="type">NonFatal</span>(e) =&gt;</span><br><span class="line">          <span class="keyword">val</span> msg = <span class="string">s&quot;Failed to serialize task <span class="subst">$taskId</span>, not attempting to retry it.&quot;</span></span><br><span class="line">          logError(msg, e)</span><br><span class="line">          abort(<span class="string">s&quot;<span class="subst">$msg</span> Exception during serialization: <span class="subst">$e</span>&quot;</span>)</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">TaskNotSerializableException</span>(e)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 如果序列化后的体积超过指定阈值，那么会打印一条警告信息</span></span><br><span class="line">      <span class="keyword">if</span> (serializedTask.limit() &gt; <span class="type">TaskSetManager</span>.<span class="type">TASK_SIZE_TO_WARN_KB</span> * <span class="number">1024</span> &amp;&amp;</span><br><span class="line">        !emittedTaskSizeWarning) &#123;</span><br><span class="line">        emittedTaskSizeWarning = <span class="literal">true</span></span><br><span class="line">        logWarning(<span class="string">s&quot;Stage <span class="subst">$&#123;task.stageId&#125;</span> contains a task of very large size &quot;</span> +</span><br><span class="line">          <span class="string">s&quot;(<span class="subst">$&#123;serializedTask.limit() / 1024&#125;</span> KB). The maximum recommended task size is &quot;</span> +</span><br><span class="line">          <span class="string">s&quot;<span class="subst">$&#123;TaskSetManager.TASK_SIZE_TO_WARN_KB&#125;</span> KB.&quot;</span>)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 更新调度池中的运行任务统计的簿记量</span></span><br><span class="line">      addRunningTask(taskId)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="keyword">val</span> taskName = <span class="string">s&quot;task <span class="subst">$&#123;info.id&#125;</span> in stage <span class="subst">$&#123;taskSet.id&#125;</span>&quot;</span></span><br><span class="line">      logInfo(<span class="string">s&quot;Starting <span class="subst">$taskName</span> (TID <span class="subst">$taskId</span>, <span class="subst">$host</span>, executor <span class="subst">$&#123;info.executorId&#125;</span>, &quot;</span> +</span><br><span class="line">        <span class="string">s&quot;partition <span class="subst">$&#123;task.partitionId&#125;</span>, <span class="subst">$taskLocality</span>, <span class="subst">$&#123;serializedTask.limit()&#125;</span> bytes)&quot;</span>)</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 通过dagScheduler给事件总线头第一个任务开始的事件</span></span><br><span class="line">      sched.dagScheduler.taskStarted(task, info)</span><br><span class="line">      <span class="comment">// 封装成一个TaskDescription对象，并返回给上层调用</span></span><br><span class="line">      <span class="keyword">new</span> <span class="type">TaskDescription</span>(</span><br><span class="line">        taskId,</span><br><span class="line">        attemptNum,</span><br><span class="line">        execId,</span><br><span class="line">        taskName,</span><br><span class="line">        index,</span><br><span class="line">        addedFiles,</span><br><span class="line">        addedJars,</span><br><span class="line">        task.localProperties,</span><br><span class="line">        serializedTask)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="type">None</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个方法的作用是对给定的executor和本地性级别，分配一个符合要求的任务给这个executor。 最终任务被封装成TaskDescription对象。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>在给定的计算资源上分配合适的任务，这个工作主要是由<code>TaskScheduler</code>和<code>TaskSetManager</code>两个类协同完成的。</p>
+<p>而任务本地性的维护与分配时的检查工作是在<code>TaskSetManage</code>r中完成的。</p>
+<p>接下来，我们分析一下获取到可以实际运行的任务后，<code>SchedulerBackend</code>是怎么把这些任务发送到制定的executor上执行的。</p>
+<h2 id="DriverEndpoint-makeOffers-1"><a href="#DriverEndpoint-makeOffers-1" class="headerlink" title="DriverEndpoint.makeOffers"></a>DriverEndpoint.makeOffers</h2><p>首先还得接着回到<code>DriverEndpoint.makeOffers</code>方法，makeOffers方法中通过调用<code>TaskSchedulerImpl.resourceOffers</code>方法切入<code>TaskSchedulerImpl</code>，然后就是<code>TaskSchedulerImpl</code>在做任务分配的工作，最终<code>TaskSchedulerImpl</code>将分配好的任务以TaskDescription的封装形式返回给<code>DriverEndpoint</code>（DriverEndpoint是调度后端的一个内部类），然后紧接着调用<code>DriverEndpoint.launchTasks</code>方法将这些任务传给相应的executor执行。</p>
+<h2 id="DriverEndpoint-launchTasks"><a href="#DriverEndpoint-launchTasks" class="headerlink" title="DriverEndpoint.launchTasks"></a>DriverEndpoint.launchTasks</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">launchTasks</span></span>(tasks: <span class="type">Seq</span>[<span class="type">Seq</span>[<span class="type">TaskDescription</span>]]) &#123;</span><br><span class="line">  <span class="keyword">for</span> (task &lt;- tasks.flatten) &#123;</span><br><span class="line">    <span class="keyword">val</span> serializedTask = <span class="type">TaskDescription</span>.encode(task)</span><br><span class="line">    <span class="keyword">if</span> (serializedTask.limit() &gt;= maxRpcMessageSize) &#123;</span><br><span class="line">      scheduler.taskIdToTaskSetManager.get(task.taskId).foreach &#123; taskSetMgr =&gt;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="keyword">var</span> msg = <span class="string">&quot;Serialized task %s:%d was %d bytes, which exceeds max allowed: &quot;</span> +</span><br><span class="line">            <span class="string">&quot;spark.rpc.message.maxSize (%d bytes). Consider increasing &quot;</span> +</span><br><span class="line">            <span class="string">&quot;spark.rpc.message.maxSize or using broadcast variables for large values.&quot;</span></span><br><span class="line">          msg = msg.format(task.taskId, task.index, serializedTask.limit(), maxRpcMessageSize)</span><br><span class="line">          <span class="comment">// 注意，这里只要有一个task体积超过阈值，就将该task所属的taskSet取消掉</span></span><br><span class="line">          <span class="comment">// 为什么这么做呢？因为其实一个taskset中的所有task的体积都是一样的，只是partition序号不同而已，</span></span><br><span class="line">          <span class="comment">// 所以一个task体积超过阈值，taskset中的其他task也必然超过阈值，</span></span><br><span class="line">          <span class="comment">// 所以没有必要再尝试其他的task, 直接把taskset取消掉更高效</span></span><br><span class="line">          taskSetMgr.abort(msg)</span><br><span class="line">        &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">          <span class="keyword">case</span> e: <span class="type">Exception</span> =&gt; logError(<span class="string">&quot;Exception in error callback&quot;</span>, e)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">val</span> executorData = executorDataMap(task.executorId)</span><br><span class="line">      <span class="comment">// 维护cpu资源信息</span></span><br><span class="line">      executorData.freeCores -= scheduler.<span class="type">CPUS_PER_TASK</span></span><br><span class="line"></span><br><span class="line">      logDebug(<span class="string">s&quot;Launching task <span class="subst">$&#123;task.taskId&#125;</span> on executor id: <span class="subst">$&#123;task.executorId&#125;</span> hostname: &quot;</span> +</span><br><span class="line">        <span class="string">s&quot;<span class="subst">$&#123;executorData.executorHost&#125;</span>.&quot;</span>)</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 通过rpc发送任务到指定的executor上</span></span><br><span class="line">      executorData.executorEndpoint.send(<span class="type">LaunchTask</span>(<span class="keyword">new</span> <span class="type">SerializableBuffer</span>(serializedTask)))</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个方法跟简单，主要就是对TaskDescription进行序列化，然后检查体积是否超过阈值，如果没超过阈值就调用rpc服务引用，将任务发送到指定的executor上。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>好了，经过漫长的调用，终于我们的任务要离开driver，驶向executor了，回顾一下任务在driver中从诞生到最终发送的过程，主要有一下几个步骤：</p>
+<ul>
+<li><code>DAGSchedule</code>r对作业计算链按照shuffle依赖划分多个stage，提交一个stage根据个stage的一些信息创建多个Task，包括<code>ShuffleMapTask</code>和<code>ResultTask</code>, 并封装成一个任务集（TaskSet）,把这个任务集交给<code>TaskScheduler</code>。</li>
+<li><code>TaskSchedulerImpl</code>将接收到的任务集加入调度池中，然后通知调度后端<code>SchedulerBackend</code>。</li>
+<li><code>CoarseGrainedSchedulerBackend</code>收到新任务提交的通知后，检查下现在可用 executor有哪些，并把这些可用的executor交给<code>TaskSchedulerImpl</code>。</li>
+<li><code>TaskSchedulerImpl</code>根据获取到的计算资源，根据任务本地性级别的要求以及考虑到黑名单因素，按照round-robin的方式对可用的executor进行轮询分配任务。</li>
+<li>经过多个本地性级别分配，多轮分配后最终得出任务与executor之间的分配关系，并封装成<code>TaskDescription</code>形式返回给Driver上的<code>SchedulerBackend</code></li>
+<li><code>SchedulerBackend</code>拿到这些分配关系后，就知道哪些任务该发往哪个executor了，通过调用rpc接口将任务通过网络发送即可。</li>
+</ul>
+
 	
    
 
@@ -1452,15 +343,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JVM</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Spark</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">随笔</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Big Data</a>
         		</li>
       		
 		</ul>
@@ -1472,7 +359,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/JAVA学习总结//" class="article-tag-list-link color4">JAVA学习总结</a>
+        			<a href="/categories/Spark源码解读//" class="article-tag-list-link color5">Spark源码解读</a>
         		</li>
       		
 		</ul>
@@ -1480,16 +367,84 @@
 
 
       
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/10/07/%E3%80%90JVM%E3%80%91%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/">展开全文 >></a>
-        </p>
-      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2023/02/25/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
       
       <div class="clearfix"></div>
     </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2023/03/06/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DAGScheduler/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          【Spark源码解读】DAGScheduler
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/02/20/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91SparkContext/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">【Spark源码解读】DAGScheduler</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -1509,12 +464,14 @@
 
 
 
+  
+  
+  
 
   
+
   
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/3/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/5/">Next &amp;raquo;</a>
-    </nav>
+
   
 
 
@@ -1549,8 +506,8 @@
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

@@ -8,17 +8,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>小张的技术小木屋</title>
+  <title>【Spark源码解读】DAGScheduler | 小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
-<meta property="og:type" content="website">
-<meta property="og:title" content="小张的技术小木屋">
-<meta property="og:url" content="http://example.com/index.html">
+  <meta name="description" content="本系列将参考Spark源码设计，尝试解读Spark源码中的几个核心模块，并结合源码分析实现。本篇，我会从一次spark作业的运行为切入点，将spark运行过程中涉及到的各个步骤，包括DAG图的划分，任务集的创建，资源分配，任务序列化，任务分发到各个executor，任务执行，任务结果回传driver等等各个环节串联起来，以整个任务运行的调用链为线索，将spark-core中的各个基础设施联系起来，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Spark源码解读】DAGScheduler">
+<meta property="og:url" content="http://example.com/2023/05/11/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DAGScheduler/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
-<meta property="og:description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
+<meta property="og:description" content="本系列将参考Spark源码设计，尝试解读Spark源码中的几个核心模块，并结合源码分析实现。本篇，我会从一次spark作业的运行为切入点，将spark运行过程中涉及到的各个步骤，包括DAG图的划分，任务集的创建，资源分配，任务序列化，任务分发到各个executor，任务执行，任务结果回传driver等等各个环节串联起来，以整个任务运行的调用链为线索，将spark-core中的各个基础设施联系起来，">
 <meta property="og:locale">
+<meta property="article:published_time" content="2023-05-11T02:31:48.000Z">
+<meta property="article:modified_time" content="2023-05-31T07:33:43.433Z">
 <meta property="article:author" content="Chenzuo Zhang">
-<meta property="article:tag" content="Java,Leetcode,工程师,代码,后端开发,大数据开发">
+<meta property="article:tag" content="Spark">
+<meta property="article:tag" content="Big Data">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="小张的技术小木屋" type="application/atom+xml">
@@ -192,21 +195,24 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-    <article id="post-【Spark源码解读】DAGScheduler" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+            <article id="post-【Spark源码解读】DAGScheduler" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/05/11/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DAGScheduler/">【Spark源码解读】DAGScheduler</a>
+    <h1 class="article-title" itemprop="name">
+      【Spark源码解读】DAGScheduler
     </h1>
   
 
         
         
+        <!-- 不蒜子统计 -->
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
 
 <a href="/2023/05/11/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DAGScheduler/" class="archive-article-date">
   	<time datetime="2023-05-11T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-05-11</time>
@@ -239,6 +245,10 @@
         
 
   
+    <span class="archive-article-date">
+        阅读量 <span id="busuanzi_value_page_pv"></span>
+    </span>
+  
 
       </header>
     
@@ -246,7 +256,88 @@
   <div class="article-entry" itemprop="articleBody">
    
 
-			<p>本系列将参考Spark源码设计，尝试解读Spark源码中的几个核心模块，并结合源码分析实现。本篇，我会从一次spark作业的运行为切入点，将spark运行过程中涉及到的各个步骤，包括DAG图的划分，任务集的创建，资源分配，任务序列化，任务分发到各个executor，任务执行，任务结果回传driver等等各个环节串联起来，以整个任务运行的调用链为线索，将spark-core中的各个基础设施联系起来，这样我们就能对spark的各个基础设施模块的作用有一个整体的认识，然后有了对spark整体框架的印象，再对其中的各个模块各个击破，分别深入研究，通过这种循序渐进的方式，最后才能对spark-core有一个比较深入而全面的掌握。当然，这篇文章的主要目的是理清spark作业的整个运行流程。</p>
+	
+		<p>本系列将参考Spark源码设计，尝试解读Spark源码中的几个核心模块，并结合源码分析实现。本篇，我会从一次spark作业的运行为切入点，将spark运行过程中涉及到的各个步骤，包括DAG图的划分，任务集的创建，资源分配，任务序列化，任务分发到各个executor，任务执行，任务结果回传driver等等各个环节串联起来，以整个任务运行的调用链为线索，将spark-core中的各个基础设施联系起来，这样我们就能对spark的各个基础设施模块的作用有一个整体的认识，然后有了对spark整体框架的印象，再对其中的各个模块各个击破，分别深入研究，通过这种循序渐进的方式，最后才能对spark-core有一个比较深入而全面的掌握。当然，这篇文章的主要目的是理清spark作业的整个运行流程。</p>
+<a id="more"></a>
+
+<ul>
+<li><a href="#%E5%85%A5%E5%8F%A3sparkcontextrunjob">入口：SparkContext.runJob</a></li>
+<li><a href="#dagschedulersubmitjob">DAGScheduler.submitJob</a><ul>
+<li><a href="#handlejobsubmitted">handleJobSubmitted</a></li>
+</ul>
+</li>
+<li><a href="#stage%E7%9A%84%E5%88%92%E5%88%86%E5%92%8C%E5%88%9B%E5%BB%BA">stage的划分和创建</a><ul>
+<li><a href="#dagschedulercreateresultstage">DAGScheduler.createResultStage</a></li>
+<li><a href="#getshuffledependencies">getShuffleDependencies</a></li>
+<li><a href="#getorcreateshufflemapstage">getOrCreateShuffleMapStage</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93">小结</a></li>
+</ul>
+</li>
+<li><a href="#stage%E6%8F%90%E4%BA%A4">stage提交</a><ul>
+<li><a href="#submitstage">submitStage</a></li>
+<li><a href="#submitmissingtasks">submitMissingTasks</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="入口：SparkContext-runJob"><a href="#入口：SparkContext-runJob" class="headerlink" title="入口：SparkContext.runJob"></a>入口：SparkContext.runJob</h1><p>我们知道spark中的作业执行时懒执行的，懒执行最大的好处是可以把一些算子向流水线一样chain在一起，从而形成流式的计算模式，个人认为这个特点也是spark比mapreduce性能高的一种重要原因,避免中间多次落盘。扯远了，我们回到这个方法，通过方法注释可以看出来，这个方法是spark中所有行动算子的入口。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Run a function on a given set of partitions in an RDD and pass the results to the given</span></span><br><span class="line"><span class="comment">* handler function. This is the main entry point for all actions in Spark.</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* @param rdd           target RDD to run tasks on</span></span><br><span class="line"><span class="comment">* @param func          a function to run on each partition of the RDD</span></span><br><span class="line"><span class="comment">* @param partitions    set of partitions to run on; some jobs may not want to compute on all</span></span><br><span class="line"><span class="comment">*                      partitions of the target RDD, e.g. for operations like `first()`</span></span><br><span class="line"><span class="comment">* @param resultHandler callback to pass each result to</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">runJob</span></span>[<span class="type">T</span>, <span class="type">U</span>: <span class="type">ClassTag</span>](</span><br><span class="line">    rdd: <span class="type">RDD</span>[<span class="type">T</span>],</span><br><span class="line">    func: (<span class="type">TaskContext</span>, <span class="type">Iterator</span>[<span class="type">T</span>]) =&gt; <span class="type">U</span>,</span><br><span class="line">    partitions: <span class="type">Seq</span>[<span class="type">Int</span>],</span><br><span class="line">    resultHandler: (<span class="type">Int</span>, <span class="type">U</span>) =&gt; <span class="type">Unit</span>): <span class="type">Unit</span> = &#123;</span><br><span class="line">        <span class="keyword">if</span> (stopped.get()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">IllegalStateException</span>(<span class="string">&quot;SparkContext has been shutdown&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">val</span> callSite = getCallSite</span><br><span class="line">        <span class="keyword">val</span> cleanedFunc = clean(func)</span><br><span class="line">        logInfo(<span class="string">&quot;Starting job: &quot;</span> + callSite.shortForm)</span><br><span class="line">        <span class="comment">// 调用DAGScheduler的runJob方法</span></span><br><span class="line">        dagScheduler.runJob(rdd, cleanedFunc, partitions, callSite, resultHandler, localProperties.get)</span><br><span class="line">        <span class="comment">// 更新控制台打印的进度条信息</span></span><br><span class="line">        progressBar.foreach(_.finishAll())</span><br><span class="line">        <span class="comment">// 处理RDD的checkpoint</span></span><br><span class="line">        rdd.doCheckpoint()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>首先清除闭包的一些不必要的引用，这一步主要是为了方便序列化，因为一些不必要的引用可能引用了不可序列化的对象，这会导致函数不可序列化。很多时候，用户写的代码并不是很靠谱，spark考虑到这一点，所以这也是为了尽量减少用户的开发难度。</li>
+<li>调用DAGScheduler执行提交任务的逻辑</li>
+</ul>
+<h1 id="DAGScheduler-submitJob"><a href="#DAGScheduler-submitJob" class="headerlink" title="DAGScheduler.submitJob"></a>DAGScheduler.submitJob</h1><p>经过一些调用，最终会调用到这个方法。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">submitJob</span></span>[<span class="type">T</span>, <span class="type">U</span>](</span><br><span class="line">  rdd: <span class="type">RDD</span>[<span class="type">T</span>],</span><br><span class="line">  func: (<span class="type">TaskContext</span>, <span class="type">Iterator</span>[<span class="type">T</span>]) =&gt; <span class="type">U</span>,</span><br><span class="line">  partitions: <span class="type">Seq</span>[<span class="type">Int</span>],</span><br><span class="line">  callSite: <span class="type">CallSite</span>,</span><br><span class="line">  resultHandler: (<span class="type">Int</span>, <span class="type">U</span>) =&gt; <span class="type">Unit</span>,</span><br><span class="line">  properties: <span class="type">Properties</span>): <span class="type">JobWaiter</span>[<span class="type">U</span>] = &#123;</span><br><span class="line">    <span class="comment">// Check to make sure we are not launching a task on a partition that does not exist.</span></span><br><span class="line">    <span class="keyword">val</span> maxPartitions = rdd.partitions.length</span><br><span class="line">    <span class="comment">// 检查是否有非法的partition</span></span><br><span class="line">    partitions.find(p =&gt; p &gt;= maxPartitions || p &lt; <span class="number">0</span>).foreach &#123; p =&gt;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">IllegalArgumentException</span>(</span><br><span class="line">        <span class="string">&quot;Attempting to access a non-existent partition: &quot;</span> + p + <span class="string">&quot;. &quot;</span> +</span><br><span class="line">        <span class="string">&quot;Total number of partitions: &quot;</span> + maxPartitions)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// nextJobId每次自增1</span></span><br><span class="line">    <span class="keyword">val</span> jobId = nextJobId.getAndIncrement()</span><br><span class="line">    <span class="comment">// 如果要运行的分区数为0，那么就没必要运行，直接返回成功就行了</span></span><br><span class="line">    <span class="keyword">if</span> (partitions.size == <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="comment">// Return immediately if the job is running 0 tasks</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="type">JobWaiter</span>[<span class="type">U</span>](<span class="keyword">this</span>, jobId, <span class="number">0</span>, resultHandler)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    assert(partitions.size &gt; <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">val</span> func2 = func.asInstanceOf[(<span class="type">TaskContext</span>, <span class="type">Iterator</span>[_]) =&gt; _]</span><br><span class="line">    <span class="keyword">val</span> waiter = <span class="keyword">new</span> <span class="type">JobWaiter</span>(<span class="keyword">this</span>, jobId, partitions.size, resultHandler)</span><br><span class="line">    <span class="comment">// 向DAG的事件处理器投递一个任务提交的事件</span></span><br><span class="line">    eventProcessLoop.post(<span class="type">JobSubmitted</span>(</span><br><span class="line">    jobId, rdd, func2, partitions.toArray, callSite, waiter,</span><br><span class="line">    <span class="type">SerializationUtils</span>.clone(properties)))</span><br><span class="line">    waiter</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法的逻辑也很简单。首先做一些检查，然后向DAG调度器内部的一个事件处理器投递一个作业提交的事件。<code>DAGScheduler</code>自己有一个事件处理器，是很常规的事件循环处理，使用单线程的方法循环处理事件队列中的事件，逻辑很简单，所以这里不再展开。投递任务提交任务后，最终会调用<code>DAGScheduler</code>的<code>handleJobSubmitted</code>方法。我们可以看到，<code>DAGScheduler</code>中还有很多其他类似的处理方法，对应了不同的事件类型，事件分发逻辑在<code>DAGSchedulerEventProcessLoop.doOnReceive</code>方法中，不再展开。我们仍然回到作业运行这条主线上来，继续看<code>handleJobSubmitted</code>。</p>
+<h2 id="handleJobSubmitted"><a href="#handleJobSubmitted" class="headerlink" title="handleJobSubmitted"></a>handleJobSubmitted</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span>[scheduler] <span class="function"><span class="keyword">def</span> <span class="title">handleJobSubmitted</span></span>(jobId: <span class="type">Int</span>,</span><br><span class="line">  finalRDD: <span class="type">RDD</span>[_],</span><br><span class="line">  func: (<span class="type">TaskContext</span>, <span class="type">Iterator</span>[_]) =&gt; _,</span><br><span class="line">  partitions: <span class="type">Array</span>[<span class="type">Int</span>],</span><br><span class="line">  callSite: <span class="type">CallSite</span>,</span><br><span class="line">  listener: <span class="type">JobListener</span>,</span><br><span class="line">  properties: <span class="type">Properties</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> finalStage: <span class="type">ResultStage</span> = <span class="literal">null</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// New stage creation may throw an exception if, for example, jobs are run on a</span></span><br><span class="line">    <span class="comment">// HadoopRDD whose underlying HDFS files have been deleted.</span></span><br><span class="line">    <span class="comment">// 创建最后一个stage</span></span><br><span class="line">    finalStage = createResultStage(finalRDD, func, partitions, jobId, callSite)</span><br><span class="line">    &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> e: <span class="type">Exception</span> =&gt;</span><br><span class="line">        logWarning(<span class="string">&quot;Creating new stage failed due to exception - job: &quot;</span> + jobId, e)</span><br><span class="line">        listener.jobFailed(e)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置活跃的任务</span></span><br><span class="line">    <span class="keyword">val</span> job = <span class="keyword">new</span> <span class="type">ActiveJob</span>(jobId, finalStage, callSite, listener, properties)</span><br><span class="line">    clearCacheLocs()</span><br><span class="line">    logInfo(<span class="string">&quot;Got job %s (%s) with %d output partitions&quot;</span>.format(</span><br><span class="line">    job.jobId, callSite.shortForm, partitions.length))</span><br><span class="line">    logInfo(<span class="string">&quot;Final stage: &quot;</span> + finalStage + <span class="string">&quot; (&quot;</span> + finalStage.name + <span class="string">&quot;)&quot;</span>)</span><br><span class="line">    logInfo(<span class="string">&quot;Parents of final stage: &quot;</span> + finalStage.parents)</span><br><span class="line">    logInfo(<span class="string">&quot;Missing parents: &quot;</span> + getMissingParentStages(finalStage))</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 更新一些簿记量</span></span><br><span class="line">    <span class="keyword">val</span> jobSubmissionTime = clock.getTimeMillis()</span><br><span class="line">    jobIdToActiveJob(jobId) = job</span><br><span class="line">    activeJobs += job</span><br><span class="line">    finalStage.setActiveJob(job)</span><br><span class="line">    <span class="keyword">val</span> stageIds = jobIdToStageIds(jobId).toArray</span><br><span class="line">    <span class="keyword">val</span> stageInfos = stageIds.flatMap(id =&gt; stageIdToStage.get(id).map(_.latestInfo))</span><br><span class="line">    <span class="comment">// 向事件总线中投递一个事件</span></span><br><span class="line">    listenerBus.post(</span><br><span class="line">    <span class="type">SparkListenerJobStart</span>(job.jobId, jobSubmissionTime, stageInfos, properties))</span><br><span class="line">    <span class="comment">// 提交最后一个stage</span></span><br><span class="line">    submitStage(finalStage)</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>涉及到的一些簿记量的更新就不再展开了。</p>
+</li>
+<li><p>创建最后一个stage，这一步其实会根据shuffle依赖关系对整个RDD的计算关系图（DAG）进行划分，形成不同的stage, 最后一步行动算子会创建<code>ResultStage</code>, 然后提交最后一个stage。</p>
+</li>
+</ul>
+<p>接下来的我们重点分析一下DAG图的划分以及stage的创建，这也是DAGScheduler的主要功能。</p>
+<h1 id="stage的划分和创建"><a href="#stage的划分和创建" class="headerlink" title="stage的划分和创建"></a>stage的划分和创建</h1><h2 id="DAGScheduler-createResultStage"><a href="#DAGScheduler-createResultStage" class="headerlink" title="DAGScheduler.createResultStage"></a>DAGScheduler.createResultStage</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">createResultStage</span></span>(</span><br><span class="line">  rdd: <span class="type">RDD</span>[_],</span><br><span class="line">  func: (<span class="type">TaskContext</span>, <span class="type">Iterator</span>[_]) =&gt; _,</span><br><span class="line">  partitions: <span class="type">Array</span>[<span class="type">Int</span>],</span><br><span class="line">  jobId: <span class="type">Int</span>,</span><br><span class="line">  callSite: <span class="type">CallSite</span>): <span class="type">ResultStage</span> = &#123;</span><br><span class="line">    <span class="comment">// 首先创建依赖的父stage</span></span><br><span class="line">    <span class="keyword">val</span> parents = getOrCreateParentStages(rdd, jobId)</span><br><span class="line">    <span class="keyword">val</span> id = nextStageId.getAndIncrement()</span><br><span class="line">    <span class="comment">// 有了父stage，就可以创建最后一个stage了</span></span><br><span class="line">    <span class="keyword">val</span> stage = <span class="keyword">new</span> <span class="type">ResultStage</span>(id, rdd, func, partitions, parents, jobId, callSite)</span><br><span class="line">    stageIdToStage(id) = stage</span><br><span class="line">    updateJobIdStageIdMaps(jobId, stage)</span><br><span class="line">    stage</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>重点在于创建父stage。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">getOrCreateParentStages</span></span>(rdd: <span class="type">RDD</span>[_], firstJobId: <span class="type">Int</span>): <span class="type">List</span>[<span class="type">Stage</span>] = &#123;</span><br><span class="line">    getShuffleDependencies(rdd).map &#123; shuffleDep =&gt;</span><br><span class="line">        getOrCreateShuffleMapStage(shuffleDep, firstJobId)</span><br><span class="line">    &#125;.toList</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="getShuffleDependencies"><a href="#getShuffleDependencies" class="headerlink" title="getShuffleDependencies"></a>getShuffleDependencies</h2><p>这个方法用一个栈实现对rdd的深度优先遍历，可以看到在找到shuffle依赖时就记录下来，并且不再继续寻找shuffle依赖前面的依赖。<br>所以这个方法只会在整个DAG图上找到这个rdd的上一级所有的shuffle依赖，而不会跨越多级shuffle依赖。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span>[scheduler] <span class="function"><span class="keyword">def</span> <span class="title">getShuffleDependencies</span></span>(rdd: <span class="type">RDD</span>[]): <span class="type">HashSet</span>[<span class="type">ShuffleDependency</span>[, , ]] = &#123;</span><br><span class="line">    <span class="keyword">val</span> parents = <span class="keyword">new</span> <span class="type">HashSet</span>[<span class="type">ShuffleDependency</span>[, , ]]</span><br><span class="line">    <span class="keyword">val</span> visited = <span class="keyword">new</span> <span class="type">HashSet</span>[<span class="type">RDD</span>[]]</span><br><span class="line">    <span class="comment">// 用栈实现深度优先遍历</span></span><br><span class="line">    <span class="keyword">val</span> waitingForVisit = <span class="keyword">new</span> <span class="type">ArrayStack</span>[<span class="type">RDD</span>[]]</span><br><span class="line">    waitingForVisit.push(rdd)</span><br><span class="line">    <span class="keyword">while</span> (waitingForVisit.nonEmpty) &#123;</span><br><span class="line">        <span class="keyword">val</span> toVisit = waitingForVisit.pop()</span><br><span class="line">        <span class="keyword">if</span> (!visited(toVisit)) &#123;</span><br><span class="line">            visited += toVisit</span><br><span class="line">            toVisit.dependencies.foreach &#123;</span><br><span class="line">                <span class="comment">// 如果是shuffle依赖，记录下来，并没有继续向上寻找shuffle依赖的依赖</span></span><br><span class="line">                <span class="keyword">case</span> shuffleDep: <span class="type">ShuffleDependency</span>[, _, _] =&gt;</span><br><span class="line">                parents += shuffleDep</span><br><span class="line">                <span class="keyword">case</span> dependency =&gt;</span><br><span class="line">                <span class="comment">// 对于窄依赖，</span></span><br><span class="line">                waitingForVisit.push(dependency.rdd)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    parents</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="getOrCreateShuffleMapStage"><a href="#getOrCreateShuffleMapStage" class="headerlink" title="getOrCreateShuffleMapStage"></a>getOrCreateShuffleMapStage</h2><p>我们继续看另一个重要的方法，创建shuffle的stage。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">getOrCreateShuffleMapStage</span></span>(</span><br><span class="line">  shuffleDep: <span class="type">ShuffleDependency</span>[_, _, _],</span><br><span class="line">  firstJobId: <span class="type">Int</span>): <span class="type">ShuffleMapStage</span> = &#123;</span><br><span class="line">    shuffleIdToMapStage.get(shuffleDep.shuffleId) <span class="keyword">match</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="type">Some</span>(stage) =&gt;</span><br><span class="line">        stage</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> <span class="type">None</span> =&gt;</span><br><span class="line">        <span class="comment">// Create stages for all missing ancestor shuffle dependencies.</span></span><br><span class="line">        <span class="comment">// 获取所有还没有创建stage的祖先shuffle依赖</span></span><br><span class="line">        getMissingAncestorShuffleDependencies(shuffleDep.rdd).foreach &#123; dep =&gt;</span><br><span class="line">            <span class="comment">// Even though getMissingAncestorShuffleDependencies only returns shuffle dependencies</span></span><br><span class="line">            <span class="comment">// that were not already in shuffleIdToMapStage, it&#x27;s possible that by the time we</span></span><br><span class="line">            <span class="comment">// get to a particular dependency in the foreach loop, it&#x27;s been added to</span></span><br><span class="line">            <span class="comment">// shuffleIdToMapStage by the stage creation process for an earlier dependency. </span></span><br><span class="line">            <span class="keyword">if</span> (!shuffleIdToMapStage.contains(dep.shuffleId)) &#123;</span><br><span class="line">                createShuffleMapStage(dep, firstJobId)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Finally, create a stage for the given shuffle dependency.</span></span><br><span class="line">        createShuffleMapStage(shuffleDep, firstJobId)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，这个方法会将所有还没创建stage的祖先shuffle依赖全部创建出来。</p>
+<p>我们看一下，创建ShuffleMapStage的具体过程：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">createShuffleMapStage</span></span>(shuffleDep: <span class="type">ShuffleDependency</span>[_, _, _], jobId: <span class="type">Int</span>): <span class="type">ShuffleMapStage</span> = &#123;</span><br><span class="line">    <span class="comment">// 这里可以看出，一个ShuffleStage的rdd是shuffle输入侧的rdd</span></span><br><span class="line">    <span class="keyword">val</span> rdd = shuffleDep.rdd</span><br><span class="line">    <span class="keyword">val</span> numTasks = rdd.partitions.length</span><br><span class="line">    <span class="comment">// 这里调用了获取父Stage的方法，实际上这几个方法会形成递归调用</span></span><br><span class="line">    <span class="keyword">val</span> parents = getOrCreateParentStages(rdd, jobId)</span><br><span class="line">    <span class="keyword">val</span> id = nextStageId.getAndIncrement()</span><br><span class="line">    <span class="comment">// 一个Stage就是对一些引用的封装，其中比较重要的是mapOutputTracker</span></span><br><span class="line">    <span class="keyword">val</span> stage = <span class="keyword">new</span> <span class="type">ShuffleMapStage</span>(</span><br><span class="line">    id, rdd, numTasks, parents, jobId, rdd.creationSite, shuffleDep, mapOutputTracker)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 更新一些簿记量</span></span><br><span class="line">    stageIdToStage(id) = stage</span><br><span class="line">    shuffleIdToMapStage(shuffleDep.shuffleId) = stage</span><br><span class="line">    updateJobIdStageIdMaps(jobId, stage)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在map输出追踪器中注册这个shuffle</span></span><br><span class="line">    <span class="keyword">if</span> (!mapOutputTracker.containsShuffle(shuffleDep.shuffleId)) &#123;</span><br><span class="line">        <span class="comment">// Kind of ugly: need to register RDDs with the cache and map output tracker here</span></span><br><span class="line">        <span class="comment">// since we can&#x27;t do it in the RDD constructor because # of partitions is unknown</span></span><br><span class="line">        logInfo(<span class="string">&quot;Registering RDD &quot;</span> + rdd.id + <span class="string">&quot; (&quot;</span> + rdd.getCreationSite + <span class="string">&quot;)&quot;</span>)</span><br><span class="line">        mapOutputTracker.registerShuffle(shuffleDep.shuffleId, rdd.partitions.length)</span><br><span class="line">    &#125;</span><br><span class="line">    stage</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中比较关键的步骤有：</p>
+<ul>
+<li>创建所有的父stage</li>
+<li>封装一个ShuffleMapStage对象，比较重要的是mapOutputTracker对象的引用。这个对象主要作用是追踪shuffle过程中map阶段的输出的位置信息，后面我们会讲到map输出是通过shuffleManager对map输出数据进行分区和排序处理并序列化，然后blockManager进行存储，而map输出的位置信息是通过blockId标识，并且都会传回driver，在driver中有一个MapOutputTrackerMaster组件专门负责维护所有stage的所有map任务的输出的位置信息。</li>
+<li>在mpOutputTrackerMaster注册新创建的stage,其实就是在映射结构里加一条数据</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>对于stage的创建过程做一个小结：这里涉及到几个方法形成的递归调用；在遍历rdd依赖的过程中按深度优先遍历，每遇到一个shuffle依赖就创建一个stage，所有上游的stage创建完成后，最后再创建一个ResultStage。</p>
+<h1 id="stage提交"><a href="#stage提交" class="headerlink" title="stage提交"></a>stage提交</h1><p>接下来，我们看一下在作业运行的过程中DAGScheduler负责的最后一步：stage提交</p>
+<h2 id="submitStage"><a href="#submitStage" class="headerlink" title="submitStage"></a>submitStage</h2><p>首先是submitStage方法。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">submitStage</span></span>(stage: <span class="type">Stage</span>) &#123;</span><br><span class="line">    <span class="keyword">val</span> jobId = activeJobForStage(stage)</span><br><span class="line">    <span class="keyword">if</span> (jobId.isDefined) &#123;</span><br><span class="line">        logDebug(<span class="string">&quot;submitStage(&quot;</span> + stage + <span class="string">&quot;)&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> (!waitingStages(stage) &amp;&amp; !runningStages(stage) &amp;&amp; !failedStages(stage)) &#123;</span><br><span class="line">            <span class="keyword">val</span> missing = getMissingParentStages(stage).sortBy(_.id)</span><br><span class="line">            logDebug(<span class="string">&quot;missing: &quot;</span> + missing)</span><br><span class="line">            <span class="keyword">if</span> (missing.isEmpty) &#123;</span><br><span class="line">                logInfo(<span class="string">&quot;Submitting &quot;</span> + stage + <span class="string">&quot; (&quot;</span> + stage.rdd + <span class="string">&quot;), which has no missing parents&quot;</span>)</span><br><span class="line">                submitMissingTasks(stage, jobId.get)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">for</span> (parent &lt;- missing) &#123;</span><br><span class="line">                    submitStage(parent)</span><br><span class="line">                &#125;</span><br><span class="line">                waitingStages += stage</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        abortStage(stage, <span class="string">&quot;No active job for stage &quot;</span> + stage.id, <span class="type">None</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个方法比较简单：</p>
+<ul>
+<li><p>首先是提交还没有运行过多父stage，把自身放到等待队列中</p>
+</li>
+<li><p>如果父stage都已经运行完成了，或者不存在父stage，那么提交当前stage，即调用<code>submitMissingTasks</code></p>
+</li>
+</ul>
+<h2 id="submitMissingTasks"><a href="#submitMissingTasks" class="headerlink" title="submitMissingTasks"></a>submitMissingTasks</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">submitMissingTasks</span></span>(stage: <span class="type">Stage</span>, jobId: <span class="type">Int</span>) &#123;</span><br><span class="line">    logDebug(<span class="string">&quot;submitMissingTasks(&quot;</span> + stage + <span class="string">&quot;)&quot;</span>)</span><br><span class="line">    <span class="comment">// 首先是找出还没有计算的partition有哪些</span></span><br><span class="line">    <span class="keyword">val</span> partitionsToCompute: <span class="type">Seq</span>[<span class="type">Int</span>] = stage.findMissingPartitions()</span><br><span class="line">    <span class="keyword">val</span> properties = jobIdToActiveJob(jobId).properties</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 更新簿记量</span></span><br><span class="line">    runningStages += stage</span><br><span class="line">    <span class="comment">// outputCommitCoordinator内部簿记量的更新</span></span><br><span class="line">    stage <span class="keyword">match</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> s: <span class="type">ShuffleMapStage</span> =&gt;</span><br><span class="line">        outputCommitCoordinator.stageStart(stage = s.id, maxPartitionId = s.numPartitions - <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">case</span> s: <span class="type">ResultStage</span> =&gt;</span><br><span class="line">        outputCommitCoordinator.stageStart(</span><br><span class="line">        stage = s.id, maxPartitionId = s.rdd.partitions.length - <span class="number">1</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 找出每个Task的偏向位置，对于一般的shuffle stage，通过mapOutputTracker来计算Task的偏向位置</span></span><br><span class="line">    <span class="keyword">val</span> taskIdToLocations: <span class="type">Map</span>[<span class="type">Int</span>, <span class="type">Seq</span>[<span class="type">TaskLocation</span>]] = <span class="keyword">try</span> &#123;</span><br><span class="line">        stage <span class="keyword">match</span> &#123;</span><br><span class="line">            <span class="keyword">case</span> s: <span class="type">ShuffleMapStage</span> =&gt;</span><br><span class="line">            partitionsToCompute.map &#123; id =&gt; (id, getPreferredLocs(stage.rdd, id))&#125;.toMap</span><br><span class="line">            <span class="keyword">case</span> s: <span class="type">ResultStage</span> =&gt;</span><br><span class="line">            partitionsToCompute.map &#123; id =&gt;</span><br><span class="line">                <span class="keyword">val</span> p = s.partitions(id)</span><br><span class="line">                (id, getPreferredLocs(stage.rdd, p))</span><br><span class="line">            &#125;.toMap</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="type">NonFatal</span>(e) =&gt;</span><br><span class="line">            stage.makeNewStageAttempt(partitionsToCompute.size)</span><br><span class="line">            listenerBus.post(<span class="type">SparkListenerStageSubmitted</span>(stage.latestInfo, properties))</span><br><span class="line">            abortStage(stage, <span class="string">s&quot;Task creation failed: <span class="subst">$e</span>\n<span class="subst">$&#123;Utils.exceptionString(e)&#125;</span>&quot;</span>, <span class="type">Some</span>(e))</span><br><span class="line">            runningStages -= stage</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 更新stage最近一次的尝试的信息</span></span><br><span class="line">    stage.makeNewStageAttempt(partitionsToCompute.size, taskIdToLocations.values.toSeq)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果没有submission，这个stage会被认为是被跳过的</span></span><br><span class="line">    <span class="keyword">if</span> (partitionsToCompute.nonEmpty) &#123;</span><br><span class="line">        stage.latestInfo.submissionTime = <span class="type">Some</span>(clock.getTimeMillis())</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 向事件总线投递一个事件</span></span><br><span class="line">    listenerBus.post(<span class="type">SparkListenerStageSubmitted</span>(stage.latestInfo, properties))</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 对任务进行序列化，这里对RDD和ShuffleDependency对象进行序列化</span></span><br><span class="line">    <span class="keyword">var</span> taskBinary: <span class="type">Broadcast</span>[<span class="type">Array</span>[<span class="type">Byte</span>]] = <span class="literal">null</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// For ShuffleMapTask, serialize and broadcast (rdd, shuffleDep).</span></span><br><span class="line">    <span class="comment">// For ResultTask, serialize and broadcast (rdd, func).</span></span><br><span class="line">        <span class="keyword">val</span> taskBinaryBytes: <span class="type">Array</span>[<span class="type">Byte</span>] = stage <span class="keyword">match</span> &#123;</span><br><span class="line">            <span class="keyword">case</span> stage: <span class="type">ShuffleMapStage</span> =&gt;</span><br><span class="line">            <span class="type">JavaUtils</span>.bufferToArray(</span><br><span class="line">                closureSerializer.serialize((stage.rdd, stage.shuffleDep): <span class="type">AnyRef</span>))</span><br><span class="line">            <span class="keyword">case</span> stage: <span class="type">ResultStage</span> =&gt;</span><br><span class="line">            <span class="type">JavaUtils</span>.bufferToArray(closureSerializer.serialize((stage.rdd, stage.func): <span class="type">AnyRef</span>))</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// RDD和ShuffleDependency的序列化数据是通过广播变量传输到executor端的</span></span><br><span class="line">        <span class="comment">// 广播变量实际上也是先将数据通过blockManager写入内存或磁盘，然后executor端通过rpc远程拉取数据</span></span><br><span class="line">        taskBinary = sc.broadcast(taskBinaryBytes)</span><br><span class="line">    &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">    <span class="comment">// In the case of a failure during serialization, abort the stage.</span></span><br><span class="line">        <span class="keyword">case</span> e: <span class="type">NotSerializableException</span> =&gt;</span><br><span class="line">            abortStage(stage, <span class="string">&quot;Task not serializable: &quot;</span> + e.toString, <span class="type">Some</span>(e))</span><br><span class="line">            runningStages -= stage</span><br><span class="line">            <span class="comment">// Abort execution</span></span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        <span class="keyword">case</span> <span class="type">NonFatal</span>(e) =&gt;</span><br><span class="line">            abortStage(stage, <span class="string">s&quot;Task serialization failed: <span class="subst">$e</span>\n<span class="subst">$&#123;Utils.exceptionString(e)&#125;</span>&quot;</span>, <span class="type">Some</span>(e))</span><br><span class="line">            runningStages -= stage</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> tasks: <span class="type">Seq</span>[<span class="type">Task</span>[_]] = <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 对任务运行的统计量累加器对象的序列化</span></span><br><span class="line">        <span class="comment">// 累加器对象序列化有一个比较有意思的地方，在readObject方法中，可以看一下</span></span><br><span class="line">        <span class="keyword">val</span> serializedTaskMetrics = closureSerializer.serialize(stage.latestInfo.taskMetrics).array()</span><br><span class="line">        stage <span class="keyword">match</span> &#123;</span><br><span class="line">            <span class="keyword">case</span> stage: <span class="type">ShuffleMapStage</span> =&gt;</span><br><span class="line">            stage.pendingPartitions.clear()</span><br><span class="line">            <span class="comment">// 每个分区创建一个Task</span></span><br><span class="line">            partitionsToCompute.map &#123; id =&gt;</span><br><span class="line">                <span class="keyword">val</span> locs = taskIdToLocations(id)</span><br><span class="line">                <span class="keyword">val</span> part = stage.rdd.partitions(id)</span><br><span class="line">                stage.pendingPartitions += id</span><br><span class="line">                <span class="keyword">new</span> <span class="type">ShuffleMapTask</span>(stage.id, stage.latestInfo.attemptNumber,</span><br><span class="line">                taskBinary, part, locs, properties, serializedTaskMetrics, <span class="type">Option</span>(jobId),</span><br><span class="line">                <span class="type">Option</span>(sc.applicationId), sc.applicationAttemptId)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">case</span> stage: <span class="type">ResultStage</span> =&gt;</span><br><span class="line">            partitionsToCompute.map &#123; id =&gt;</span><br><span class="line">                <span class="keyword">val</span> p: <span class="type">Int</span> = stage.partitions(id)</span><br><span class="line">                <span class="keyword">val</span> part = stage.rdd.partitions(p)</span><br><span class="line">                <span class="keyword">val</span> locs = taskIdToLocations(id)</span><br><span class="line">                <span class="keyword">new</span> <span class="type">ResultTask</span>(stage.id, stage.latestInfo.attemptNumber,</span><br><span class="line">                taskBinary, part, locs, id, properties, serializedTaskMetrics,</span><br><span class="line">                <span class="type">Option</span>(jobId), <span class="type">Option</span>(sc.applicationId), sc.applicationAttemptId)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="type">NonFatal</span>(e) =&gt;</span><br><span class="line">            abortStage(stage, <span class="string">s&quot;Task creation failed: <span class="subst">$e</span>\n<span class="subst">$&#123;Utils.exceptionString(e)&#125;</span>&quot;</span>, <span class="type">Some</span>(e))</span><br><span class="line">            runningStages -= stage</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (tasks.size &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        logInfo(<span class="string">s&quot;Submitting <span class="subst">$&#123;tasks.size&#125;</span> missing tasks from <span class="subst">$stage</span> (<span class="subst">$&#123;stage.rdd&#125;</span>) (first 15 &quot;</span> +</span><br><span class="line">            <span class="string">s&quot;tasks are for partitions <span class="subst">$&#123;tasks.take(15).map(_.partitionId)&#125;</span>)&quot;</span>)</span><br><span class="line">        <span class="comment">// 从这里DAGScheduler把接力棒交给了Task调度器</span></span><br><span class="line">        taskScheduler.submitTasks(<span class="keyword">new</span> <span class="type">TaskSet</span>(</span><br><span class="line">            tasks.toArray, stage.id, stage.latestInfo.attemptNumber, jobId, properties))</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">val</span> debugString = stage <span class="keyword">match</span> &#123;</span><br><span class="line">            <span class="keyword">case</span> stage: <span class="type">ShuffleMapStage</span> =&gt;</span><br><span class="line">            <span class="string">s&quot;Stage <span class="subst">$&#123;stage&#125;</span> is actually done; &quot;</span> +</span><br><span class="line">                <span class="string">s&quot;(available: <span class="subst">$&#123;stage.isAvailable&#125;</span>,&quot;</span> +</span><br><span class="line">                <span class="string">s&quot;available outputs: <span class="subst">$&#123;stage.numAvailableOutputs&#125;</span>,&quot;</span> +</span><br><span class="line">                <span class="string">s&quot;partitions: <span class="subst">$&#123;stage.numPartitions&#125;</span>)&quot;</span></span><br><span class="line">            <span class="keyword">case</span> stage : <span class="type">ResultStage</span> =&gt;</span><br><span class="line">            <span class="string">s&quot;Stage <span class="subst">$&#123;stage&#125;</span> is actually done; (partitions: <span class="subst">$&#123;stage.numPartitions&#125;</span>)&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">        logDebug(debugString)</span><br><span class="line"></span><br><span class="line">        submitWaitingChildStages(stage)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个方法比较长，但是应该说是在DAG调度器提交作业的过程中最重要的方法了。主要做的事情其实就是根据要提交的stage创建一个任务集，每个partition创建一个Task，所有要计算的Task形成一个任务集。</p>
+<ol>
+<li>更新一些簿记量</li>
+<li>找出每个Task的偏向位置，对于一般的shuffle stage，通过mapOutputTracker来计算Task的偏向位置</li>
+<li>向事件总线投递一个stage提交的事件</li>
+<li>对RDD和ShuffleDependency或者ResultStage的计算函数func进行序列化，以用于传输</li>
+<li>序列化任务运行统计量的累加器对象，加器对象序列化有一个比较有意思的地方，在readObject方法中，可以看一下</li>
+<li>对每个要计算的分区创建一个Task，根据stage类型分为ShuffleMapTask和ResultTask两种</li>
+<li>最后调用TaskScheduler的方法提交任务</li>
+</ol>
+<p>至此，DAGScheduler完成了他的使命，成功将接力棒交给了TaskScheduler，接下来就是TaskScheduler的表演了。</p>
+
 	
    
 
@@ -286,265 +377,75 @@
 
 
       
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/05/11/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DAGScheduler/">展开全文 >></a>
-        </p>
-      
 
       
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
         
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【Spark源码解读】DiskStock" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/05/10/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DiskStock/">【Spark源码解读】DiskStock</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2023/05/10/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DiskStock/" class="archive-article-date">
-  	<time datetime="2023-05-10T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-05-10</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">1.3k字</span>
-      </span>
+      </div>
     </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">5分</span>
-      </span>
-    </span>
+  </div>
 </div>
 
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>本系列将参考Spark源码设计，尝试解读Spark源码中的几个核心模块，并结合源码分析实现。</p>
-<p>接着上一篇，本篇，我们分析一下实现磁盘存储的功能类<code>DiskStore</code>，这个类相对简单。在正式展开之前，我觉得有必要大概分析一下<code>BlockManager</code>的背景，或者说它的运行环境，运行的作用范围。<code>Blockmanager</code>这个类其实在运行时的每个节点都会有一个实例（包括driver和executor进程），因为不论是driver端进行广播变量的创建，还是executor端shuffle过程中写shuffle块，或者是任务运行时结果太大需要通过<code>BlockManager</code>传输，或者是RDD的缓存，其实在每个运行节点上都会通过<code>Blockmanager</code>来管理程序内部对于本地的内存和磁盘的读写.所以综上，我想表达的核心意思就是每个进程（driver和executor）都有一个<code>Blockmanager</code>实例，而这些<code>Blockmanager</code>实例是通过<code>BlockManagerId</code>类来进行唯一区分的，<code>BlockManagerId</code>实际上是对进程物理位置的封装。</p>
-	
-   
-
-
-
-      
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2023/05/11/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DAGScheduler/" alt="微信分享二维码">
     </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Spark</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Big Data</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Spark源码解读//" class="article-tag-list-link color5">Spark源码解读</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/05/10/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DiskStock/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【Spark源码解读】BlockManager" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/05/09/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91BlockManager/">【Spark源码解读】BlockManager</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2023/05/09/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91BlockManager/" class="archive-article-date">
-  	<time datetime="2023-05-09T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-05-09</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">3k字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">12分</span>
-      </span>
-    </span>
 </div>
 
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>本系列将参考Spark源码设计，尝试解读Spark源码中的几个核心模块，并结合源码分析实现。</p>
-<p>根据之前的一系列分析，我们对spark作业从创建到调度分发，到执行，最后结果回传driver的过程有了一个大概的了解。但是在分析源码的过程中也留下了大量的问题，最主要的就是涉及到的spark中重要的几个基础模块，我们对这些基础设施的内部细节并不是很了解，之前走读源码时基本只是大概了解每个模块的作用以及对外的主要接口，这些重要的模块包括<code>BlockMananger</code>, <code>MemoryMananger</code>, <code>ShuffleManager</code>, <code>MapOutputTracker</code>, rpc模块<code>NettyRPCEnv</code>，以及<code>BroadcastManager</code>。 </p>
-<p>而对于调度系统涉及到的几个类包括<code>DAGSchedulerManager</code>, <code>TaskSchedulerManager</code>, <code>CoarseGrainedSchedulerBackend</code>, <code>CoarseGrainedExecutorBackend</code>, <code>Executor</code>, <code>TaskRunner</code>，我们之前已经做了较为详细的分析，因此这几个模块暂告一段落。</p>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Spark</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Big Data</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Spark源码解读//" class="article-tag-list-link color5">Spark源码解读</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/05/09/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91BlockManager/">展开全文 >></a>
-        </p>
-      
-
+<div class="mask js-mask"></div>
       
       <div class="clearfix"></div>
     </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2023/05/10/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DiskStock/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">【Spark源码解读】DiskStock</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -564,924 +465,14 @@
 
 
 
-
   
-    <article id="post-【missing-semester】lesson6-gitit-console" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/27/%E3%80%90missing-semester%E3%80%91lesson6-gitit-console/">【missing-semester】lesson6 git console</a>
-    </h1>
   
-
-        
-        
-
-<a href="/2021/12/27/%E3%80%90missing-semester%E3%80%91lesson6-gitit-console/" class="archive-article-date">
-  	<time datetime="2021-12-27T12:22:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-27</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">1.7k字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">6分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
 
   
 
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-	
-		<p>主要总结可能用到的git命令</p>
-<ul>
-<li><p><a href="#%E5%B0%9D%E8%AF%95%E6%96%B0%E5%BB%BA%E4%B8%80%E4%B8%AAgit%E4%BB%93%E5%BA%93">尝试新建一个git仓库</a></p>
-</li>
-<li><p><a href="#%E6%A3%80%E6%9F%A5%E6%96%87%E4%BB%B6%E7%9A%84%E7%8A%B6%E6%80%81">检查文件的状态</a></p>
-</li>
-<li><p><a href="#%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93">远程仓库</a></p>
-</li>
-<li><p><a href="#git%E7%9A%84%E5%88%86%E6%94%AF">git的分支</a></p>
-<!---more--->
-</li>
-<li><p>查看我的git的具体配置: 使用<code>git config --list</code>命令，查找得到Git的全部配置。</p>
-</li>
-<li><p>得到相关的帮助：<code>git &lt;commend&gt; -h</code>可以得到简洁的帮助。</p>
-</li>
-</ul>
-<h1 id="尝试新建一个git仓库"><a href="#尝试新建一个git仓库" class="headerlink" title="尝试新建一个git仓库"></a>尝试新建一个git仓库</h1><ul>
-<li><p>在当前文件夹新建一个仓库<br>首先在文件夹中使用<code>git init</code>命令。这会创建一个 .git 文件，包括了进行初始化git仓库的全部文件。</p>
-</li>
-<li><p>克隆已有的项目<br>在某个文件夹下，使用<code>git clone &lt;url&gt;</code> 或者自定义本地仓库名字<code>git clone &lt;url&gt; &lt;myProjectName&gt;</code> </p>
-</li>
-</ul>
-<h1 id="检查文件的状态"><a href="#检查文件的状态" class="headerlink" title="检查文件的状态"></a>检查文件的状态</h1><ul>
-<li>检查文件的状态：<code>git status</code></li>
-<li>对比文件的区别：<code>git diff</code>将对比当前工作区的文件和暂存区的文件的差异。而<code>git diff --cashed</code>可以比较暂存区与最后一次提交的区别。</li>
-<li>删除暂存区的文件：可能我们希望删除一些文件，比如我删除了一个未被追逐的工作区的文件，但是这个文件已经被暂存了。因此，我需要反向的使用<code>git rm &lt;fileName&gt;</code>操作。</li>
-<li>查看提交之间的差别：<code>git log -p -2</code> -p表示–patch，以补丁的形式显示最近两条提交的区别。 <code>log --all --graph --decorate</code>: 可视化历史记录（有向无环图)这也是我最常用的</li>
-<li>如果提交以后发现有些小的问题可以重新提交：比如添加一些内容，然后执行<code>git commit --amend -m &quot;fix&quot;</code>。比较适合发现少提交的东西，或者需要改一下注释。</li>
-<li>取消暂存的文件：<code>git reset HEAD &lt;file&gt;...</code>这个命令可以<strong>取消暂存区</strong>的某个文件，相当于撤销了某一步的add。</li>
-<li>取消对文件的修改：<code>git checkout -- &lt;file&gt;</code>，这个用最近提交的版本覆盖掉工作区和暂存区。</li>
-</ul>
-<h1 id="远程仓库"><a href="#远程仓库" class="headerlink" title="远程仓库"></a>远程仓库</h1><p>远程仓库中需要区分本地分支和远端分支的概念，本地分支是指自己的三区达成一致以后的内容。</p>
-<ul>
-<li>查看远程仓库：<code>git remote -v</code>，可以得到远程仓库及其对应的url。<code>git remote show &lt;remote&gt;</code>可以看到更多的详细信息。</li>
-<li>添加远程仓库：可以通过<code>git clone &lt;url&gt;</code>的方法。也可以使用<code>git remote add &lt;shortName&gt; &lt;url&gt;</code>的方法添加远程关联的仓库。之后可以用缩写代指这个仓库。</li>
-<li>只从远程仓库拉取数据：<code>git fetch &lt;remote&gt;</code>。这个命令会访问远程仓库，从中拉取所有你还没有的数据。 执行完成后，你将会拥有那个<strong>远程仓库中所有分支的引用</strong>。必须注意 <code>git fetch </code>命令只会将数据下载到你的<strong>本地仓库</strong>——它并不会自动合并或修改你当前的工作。 </li>
-<li>拉去分支并工作区合并：<code>git pull</code>自动抓取并合并到当前分支工作区。会自动设置本地 master 分支跟踪克隆的远程仓库的 master 分支</li>
-<li>推送到远端仓库：<code>git push &lt;remote&gt; &lt;branch&gt;</code>将当前分支commit的内容推送到远端<code>&lt;remote&gt;</code>仓库的<code>&lt;branch&gt;</code>分支上。 </li>
-<li>修改远端仓库：<code>git remote rename &lt;originName&gt; &lt;newName&gt;</code>可以修改远端仓库的名字。这同样也会修改你所有远程跟踪的分支名字，原先的<code>&lt;originName&gt;/master</code>会变成<code>&lt;newName&gt;/master</code>。</li>
-<li>删除远端仓库：<code>git remote rm &lt;remote&gt;</code>删除远端仓库。</li>
-</ul>
-<h1 id="git的分支"><a href="#git的分支" class="headerlink" title="git的分支"></a>git的分支</h1><p>本小节中，<code>&lt;remote&gt;</code>一般代指<code>origin</code>远端仓库名参数，<code>&lt;branchName&gt;</code>代指<code>master</code>分支名参数。</p>
-<ul>
-<li>查看所有分支：<code>git branch -vv</code>查看所有的分支的信息。这个命令最好首先是由<code>git fetch --all</code>拉取最新的远端信息。</li>
-<li>查看没有被合并的分支：添加<code>--merge</code> 参数可以看哪些分支已经合并到当前分支，在这个列表中分支名字前没有 * 号的分支通常可以使用 <code>git branch -d &lt;branchName&gt;</code> 删除掉</li>
-<li>创建分支：<code>git branch &lt;branchName&gt;</code> 只是创建一个新的分支，但是不会切换。</li>
-<li>分支切换：<code>git checkout &lt;branchName&gt;</code> 将HEAD指针切换到相应的分支上。为了创建和切换一次合成，<code>git checkout -b &lt;branchName&gt;</code>。需要注意的是，<strong>切换分支回改变工作区的内容，如果工作区不是干净的回禁止切换</strong>。</li>
-<li>删除分支：<code>git branch -d &lt;branchName&gt;</code> 删除某个分支。一般是已经完成了追踪。</li>
-<li>合并分支：首先需要先切换到“母分支”上，然后执行<code>git merge &lt;branchName&gt;</code>可以将这个分支的内容合并到母分支上。如果在合并的时候发生了冲突，就需要手动合并在完全完成以后重新执行<code>git add .; git commit -m &quot;&quot;</code></li>
-<li>更新远端分支的信息：<code>git fetch &lt;remote&gt;</code>获取远程仓库的更新情况。</li>
-<li>推送分支：<code>git push &lt;remote&gt; &lt;branch&gt;</code>推送到远端<remote>仓库的<branch>分支上。</li>
-<li>在远端分支的基础上建立自己的本地开发环境：<code>git checkout -b &lt;branchName&gt; &lt;remote&gt;/&lt;branchName&gt;</code>。这样本地分支会自动追踪远端的分支，只需要<code>git pull</code>就可以进行更新。</li>
-<li>修改本地分支所追踪的远端分支：<code>git branch -u &lt;remote&gt;/&lt;branchName&gt;</code>。 <blockquote>
-<p>在设置好上游分支以后，还可以使用<code>@&#123;u&#125;</code>来引用所跟踪的上游分支。比如<code>git merge @&#123;u&#125;</code>来替代<code>git merge origin/master</code>。</p>
-</blockquote>
-</li>
-<li>删除远端分支：如果已经合并到了远端的master分支，可以使用<code>git push &lt;remote&gt; --delete &lt;branchName&gt;</code></li>
-</ul>
-<blockquote>
-<p>关于git的变基操作<br>主要涉及<code>git rebase</code>指令，变基的方法其实是可以掩盖了你实际的开发流程的。这个方法所需要达成的目的其实于<code>meger</code>指令类似，但是是通过牺牲了修改历史记录从而得到了更简洁的提交信息的。</p>
-</blockquote>
-<p>对于这两种方法，只对尚未推送或分享给别人的本地修改 执行<code>rebase</code>操作清理历史；对已推送至别处的提交  执行<code>meger</code>操作，这样，你才能享受到两种方式带来的便利。</p>
-<p>因此我们这里暂时不介绍rebase的相关内容，可以参考<a target="_blank" rel="noopener" href="https://git-scm.com/book/zh/v2/Git-%E5%88%86%E6%94%AF-%E5%8F%98%E5%9F%BA">3.6 Git 分支 - 变基</a>。有更详细的介绍。</p>
-
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">git</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Mooc//" class="article-tag-list-link color5">Mooc</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/12/27/%E3%80%90missing-semester%E3%80%91lesson6-gitit-console/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【missing-semester】lesson6 git" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/27/%E3%80%90missing-semester%E3%80%91lesson6%20git/">【missing-semester】lesson6 git</a>
-    </h1>
   
 
-        
-        
-
-<a href="/2021/12/27/%E3%80%90missing-semester%E3%80%91lesson6%20git/" class="archive-article-date">
-  	<time datetime="2021-12-27T10:43:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-27</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">3k字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">10分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>MIT missing-semester 系列课程第六讲–版本控制</p>
-<p><a target="_blank" rel="noopener" href="https://missing-semester-cn.github.io/2020/version-control/">课程讲义</a></p>
-<ul>
-<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6">什么是版本控制</a></li>
-<li><a href="#git%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84">Git的数据结构</a><ul>
-<li><a href="#%E5%BF%AB%E7%85%A7">快照</a></li>
-<li><a href="#%E5%BF%AB%E7%85%A7%E7%9A%84%E5%8E%86%E5%8F%B2%E7%BA%AA%E5%BD%95%E5%85%B3%E8%81%94%E5%BF%AB%E7%85%A7">快照的历史纪录——关联快照</a></li>
-<li><a href="#git%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84blobtreecommit">Git的基本数据结构——Blob、tree、commit</a><ul>
-<li><a href="#git%E4%B8%AD%E7%9A%84%E5%AF%B9%E8%B1%A1%E4%B8%8E%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80">git中的对象与内存寻址</a></li>
-<li><a href="#%E4%BE%8B%E5%AD%90">例子</a></li>
-</ul>
-</li>
-<li><a href="#%E5%BC%95%E7%94%A8">引用</a></li>
-</ul>
-</li>
-<li><a href="#git%E7%9A%84%E4%B8%89%E9%83%A8%E6%9B%B2%E6%9C%AC%E5%9C%B0%E5%B7%A5%E4%BD%9C%E5%8C%BA%E6%9A%82%E5%AD%98%E5%8C%BA%E4%BB%93%E5%BA%93">git的三部曲——本地工作区、暂存区、仓库</a><ul>
-<li><a href="#%E8%AE%B0%E5%BD%95%E6%AF%8F%E6%AC%A1%E6%9B%B4%E6%96%B0">记录每次更新</a></li>
-</ul>
-</li>
-<li><a href="#%E9%9C%80%E8%A6%81%E5%B0%8F%E5%BF%83%E7%9A%84reset%E5%92%8Ccheckout">需要小心的reset和checkout</a><ul>
-<li><a href="#git-reset">git reset</a></li>
-<li><a href="#git-checkout">git checkout</a></li>
-<li><a href="#%E6%80%BB%E7%BB%93%E5%AF%B9%E6%AF%94">总结对比</a></li>
-</ul>
-</li>
-<li><a href="#git%E7%9A%84%E6%A0%87%E7%AD%BE">git的标签</a></li>
-</ul>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">git</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Mooc//" class="article-tag-list-link color5">Mooc</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/12/27/%E3%80%90missing-semester%E3%80%91lesson6%20git/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【乱码测试】" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-	
-		<p>ss</p>
-
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/12/27/%E3%80%90%E4%B9%B1%E7%A0%81%E6%B5%8B%E8%AF%95%E3%80%91/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【读书笔记】redis核心技术与实战（一）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/06/04/%E3%80%90%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%E3%80%91redis%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E4%B8%8E%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/">【读书笔记】redis核心技术与实战（一）</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2021/06/04/%E3%80%90%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%E3%80%91redis%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E4%B8%8E%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2021-06-04T11:51:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-04</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">6k字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">20分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<blockquote>
-<p>最近发现了很多非常不错的课程资源，打算开一个专栏专门总结在课程中收获的知识点。可能不会像总结专栏一样非常的细致，但是会从一些典型的问题入手。本文就从极客时间的redis核心技术实战说起，整理相关的读书笔记。归纳redis的知识点。</p>
-</blockquote>
-<ul>
-<li><a href="#%E5%BC%80%E7%AF%87%E8%AF%8D-%E8%BF%99%E6%A0%B7%E5%AD%A6redis%E6%89%8D%E8%83%BD%E6%8A%80%E9%AB%98%E4%B8%80%E7%AD%B9">开篇词 这样学Redis，才能技高一筹</a></li>
-<li><a href="#01--%E5%9F%BA%E6%9C%AC%E6%9E%B6%E6%9E%84%E4%B8%80%E4%B8%AA%E9%94%AE%E5%80%BC%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8C%85%E5%90%AB%E4%BB%80%E4%B9%88">01 | 基本架构：一个键值数据库包含什么？</a></li>
-<li><a href="#02--%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%BF%AB%E9%80%9F%E7%9A%84redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C">02 | 数据结构：快速的Redis有哪些慢操作？</a></li>
-<li><a href="#03--%E9%AB%98%E6%80%A7%E8%83%BDio%E6%A8%A1%E5%9E%8B%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8D%95%E7%BA%BF%E7%A8%8Bredis%E8%83%BD%E9%82%A3%E4%B9%88%E5%BF%AB">03 | 高性能IO模型：为什么单线程Redis能那么快？</a></li>
-<li><a href="#04--aof%E6%97%A5%E5%BF%97%E5%AE%95%E6%9C%BA%E4%BA%86redis%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E6%95%B0%E6%8D%AE%E4%B8%A2%E5%A4%B1">04 | AOF日志：宕机了，Redis如何避免数据丢失？</a></li>
-<li><a href="#05--rdb%E5%86%85%E5%AD%98%E5%BF%AB%E7%85%A7%E5%AE%95%E6%9C%BA%E5%90%8Eredis%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%81%A2%E5%A4%8D">05 | （RDB）内存快照：宕机后，Redis如何实现快速恢复？</a></li>
-<li><a href="#06--%E4%B8%BB%E4%BB%8E%E5%BA%93%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E4%B8%BB%E4%BB%8E%E5%BA%93%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4">06 | （主从库）数据同步：主从库如何实现数据一致？</a></li>
-<li><a href="#07--%E5%93%A8%E5%85%B5%E6%9C%BA%E5%88%B6%E4%B8%BB%E5%BA%93%E6%8C%82%E4%BA%86%E5%A6%82%E4%BD%95%E4%B8%8D%E9%97%B4%E6%96%AD%E6%9C%8D%E5%8A%A1">07 | 哨兵机制：主库挂了，如何不间断服务？</a></li>
-<li><a href="#08--%E5%93%A8%E5%85%B5%E9%9B%86%E7%BE%A4%E5%93%A8%E5%85%B5%E6%8C%82%E4%BA%86%E4%B8%BB%E4%BB%8E%E5%BA%93%E8%BF%98%E8%83%BD%E5%88%87%E6%8D%A2%E5%90%97">08 | 哨兵集群：哨兵挂了，主从库还能切换吗？</a></li>
-<li><a href="#09--%E5%88%87%E7%89%87%E9%9B%86%E7%BE%A4%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%A4%9A%E4%BA%86%E6%98%AF%E8%AF%A5%E5%8A%A0%E5%86%85%E5%AD%98%E8%BF%98%E6%98%AF%E5%8A%A0%E5%AE%9E%E4%BE%8B">09 | 切片集群：数据增多了，是该加内存还是加实例？</a></li>
-</ul>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">redis</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">数据库</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Redis//" class="article-tag-list-link color1">Redis</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/06/04/%E3%80%90%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%E3%80%91redis%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E4%B8%8E%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-当我设计RateLimiter的时候我在想些什么？（原文：How-is-the-RateLimiter-designed-and-why-）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/19/%E5%BD%93%E6%88%91%E8%AE%BE%E8%AE%A1RateLimiter%E7%9A%84%E6%97%B6%E5%80%99%E6%88%91%E5%9C%A8%E6%83%B3%E4%BA%9B%E4%BB%80%E4%B9%88%EF%BC%9F%EF%BC%88%E5%8E%9F%E6%96%87%EF%BC%9AHow-is-the-RateLimiter-designed-and-why-%EF%BC%89/">当我设计RateLimiter的时候我在想些什么？（原文：How is the RateLimiter designed, and why?）</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2021/05/19/%E5%BD%93%E6%88%91%E8%AE%BE%E8%AE%A1RateLimiter%E7%9A%84%E6%97%B6%E5%80%99%E6%88%91%E5%9C%A8%E6%83%B3%E4%BA%9B%E4%BB%80%E4%B9%88%EF%BC%9F%EF%BC%88%E5%8E%9F%E6%96%87%EF%BC%9AHow-is-the-RateLimiter-designed-and-why-%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2021-05-19T03:22:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-19</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">2.1k字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">7分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<blockquote>
-<p>本文其实是对google开源的guava库中的SmoothRateLimiter函数的设计思路的翻译和解析。</p>
-</blockquote>
-<p>虽然说在实际的工作中，充分造轮子是一件非常没有必要的事情，但是阅读别人的轮子源码，我们可以学习到很多值得借鉴的工具类设计思路。希望可以使用到自己面临的问题上。</p>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/算法与数据结构//" class="article-tag-list-link color3">算法与数据结构</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/19/%E5%BD%93%E6%88%91%E8%AE%BE%E8%AE%A1RateLimiter%E7%9A%84%E6%97%B6%E5%80%99%E6%88%91%E5%9C%A8%E6%83%B3%E4%BA%9B%E4%BB%80%E4%B9%88%EF%BC%9F%EF%BC%88%E5%8E%9F%E6%96%87%EF%BC%9AHow-is-the-RateLimiter-designed-and-why-%EF%BC%89/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-如何优雅的求解斐波那契数列" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/19/%E5%A6%82%E4%BD%95%E4%BC%98%E9%9B%85%E7%9A%84%E6%B1%82%E8%A7%A3%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91%E6%95%B0%E5%88%97/">如何优雅的求解斐波那契数列</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2021/05/19/%E5%A6%82%E4%BD%95%E4%BC%98%E9%9B%85%E7%9A%84%E6%B1%82%E8%A7%A3%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91%E6%95%B0%E5%88%97/" class="archive-article-date">
-  	<time datetime="2021-05-19T03:15:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-19</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">436字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">2分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>一道看题目其实很简单，但是后面的进阶方法其实很值得思考的题目。题目背景就不再多说了，直奔主题。<strong>三个方法，递归，迭代与快速幂。</strong></p>
-<ul>
-<li><a href="#%E9%80%92%E5%BD%92%E6%96%B9%E6%B3%95">递归方法</a></li>
-<li><a href="#%E8%BF%AD%E4%BB%A3%E6%96%B9%E6%B3%95">迭代方法</a></li>
-<li><a href="#%E5%BF%AB%E9%80%9F%E5%B9%82">快速幂</a></li>
-</ul>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">快速幂</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">递归</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/算法与数据结构//" class="article-tag-list-link color3">算法与数据结构</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/19/%E5%A6%82%E4%BD%95%E4%BC%98%E9%9B%85%E7%9A%84%E6%B1%82%E8%A7%A3%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91%E6%95%B0%E5%88%97/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-【每日一题】2020-11月每日刷题总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/12/08/%E3%80%90%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98%E3%80%912020-11%E6%9C%88%E6%AF%8F%E6%97%A5%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">【每日一题】2020.11月每日刷题总结</a>
-    </h1>
-  
-
-        
-        
-
-<a href="/2020/12/08/%E3%80%90%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98%E3%80%912020-11%E6%9C%88%E6%AF%8F%E6%97%A5%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/" class="archive-article-date">
-  	<time datetime="2020-12-08T03:10:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-12-08</time>
-</a>
-        <!-- 需要添加的位置 -->
-        <!-- 开始添加字数统计-->
-        
-          <div style="margin-top:10px;">
-    <span class="post-time">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-keyboard-o"></i>
-        <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">3.5k字</span>
-      </span>
-    </span>
-
-    <span class="post-time">
-      &nbsp; | &nbsp;
-      <span class="post-meta-item-icon">
-        <i class="fa fa-hourglass-half"></i>
-        <span class="post-meta-item-text">  阅读时长: </span>
-        <span class="post-count">18分</span>
-      </span>
-    </span>
-</div>
-
-          
-        <!-- 添加完成 -->
-
-        
-
-  
-
-      </header>
-    
-
-  <div class="article-entry" itemprop="articleBody">
-   
-
-			<p>每日一题还在坚持的刷题，但是有很多已经是做过的题目了，因此改为了每个整理一下当月的习题。11月份的题目很多是链表的操作，以及一些需要思路的题目。另外有两道对于归并思想的利用的题目尤其值得学习。这部分对于题目的讲解偏少，很多具体的细节都在代码中进行了注释，帮助大家理解。</p>
-	
-   
-
-
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">线段树</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">dp</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">单调栈</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">归并</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/每日一题//" class="article-tag-list-link color5">每日一题</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/12/08/%E3%80%90%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98%E3%80%912020-11%E6%9C%88%E6%AF%8F%E6%97%A5%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-  
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
-    </nav>
   
 
 
@@ -1516,8 +507,8 @@
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

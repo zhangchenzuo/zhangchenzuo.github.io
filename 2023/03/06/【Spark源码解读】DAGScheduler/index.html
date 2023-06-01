@@ -18,7 +18,7 @@
 <meta property="og:description" content="本系列将参考Spark源码设计，尝试解读Spark源码中的几个核心模块，并结合源码分析实现。本篇，我会从一次spark作业的运行为切入点，将spark运行过程中涉及到的各个步骤，包括DAG图的划分，任务集的创建，资源分配，任务序列化，任务分发到各个executor，任务执行，任务结果回传driver等等。">
 <meta property="og:locale">
 <meta property="article:published_time" content="2023-03-06T02:31:48.000Z">
-<meta property="article:modified_time" content="2023-05-31T10:43:37.519Z">
+<meta property="article:modified_time" content="2023-06-01T12:25:27.549Z">
 <meta property="article:author" content="Chenzuo Zhang">
 <meta property="article:tag" content="Spark">
 <meta property="article:tag" content="Big Data">
@@ -279,6 +279,14 @@
 </ul>
 </li>
 </ul>
+<blockquote>
+<p>太长不看：</p>
+</blockquote>
+<ul>
+<li><code>DAGScheduler</code>提交job，包括最后一个RDD</li>
+<li>逆向开始从rdd划分依赖，进而划分stage</li>
+<li>提交stage</li>
+</ul>
 <h1 id="入口：SparkContext-runJob"><a href="#入口：SparkContext-runJob" class="headerlink" title="入口：SparkContext.runJob"></a>入口：SparkContext.runJob</h1><p>我们知道spark中的作业执行时懒执行的，懒执行最大的好处是可以把一些算子向流水线一样串在一起，从而形成流式的计算模式，个人认为这个特点也是spark比mapreduce性能高的一种重要原因,避免中间多次落盘。<code>runJob</code>这个方法是spark中所有行动算子的入口。</p>
 <figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Run a function on a given set of partitions in an RDD and pass the results to the given</span></span><br><span class="line"><span class="comment">* handler function. This is the main entry point for all actions in Spark.</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* @param rdd           target RDD to run tasks on</span></span><br><span class="line"><span class="comment">* @param func          a function to run on each partition of the RDD</span></span><br><span class="line"><span class="comment">* @param partitions    set of partitions to run on; some jobs may not want to compute on all</span></span><br><span class="line"><span class="comment">*                      partitions of the target RDD, e.g. for operations like `first()`</span></span><br><span class="line"><span class="comment">* @param resultHandler callback to pass each result to</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">runJob</span></span>[<span class="type">T</span>, <span class="type">U</span>: <span class="type">ClassTag</span>](</span><br><span class="line">    rdd: <span class="type">RDD</span>[<span class="type">T</span>],</span><br><span class="line">    func: (<span class="type">TaskContext</span>, <span class="type">Iterator</span>[<span class="type">T</span>]) =&gt; <span class="type">U</span>,</span><br><span class="line">    partitions: <span class="type">Seq</span>[<span class="type">Int</span>],</span><br><span class="line">    resultHandler: (<span class="type">Int</span>, <span class="type">U</span>) =&gt; <span class="type">Unit</span>): <span class="type">Unit</span> = &#123;</span><br><span class="line">        <span class="keyword">if</span> (stopped.get()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">IllegalStateException</span>(<span class="string">&quot;SparkContext has been shutdown&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">val</span> callSite = getCallSite</span><br><span class="line">        <span class="keyword">val</span> cleanedFunc = clean(func)</span><br><span class="line">        logInfo(<span class="string">&quot;Starting job: &quot;</span> + callSite.shortForm)</span><br><span class="line">        <span class="comment">// 调用DAGScheduler的runJob方法</span></span><br><span class="line">        dagScheduler.runJob(rdd, cleanedFunc, partitions, callSite, resultHandler, localProperties.get)</span><br><span class="line">        <span class="comment">// 更新控制台打印的进度条信息</span></span><br><span class="line">        progressBar.foreach(_.finishAll())</span><br><span class="line">        <span class="comment">// 处理RDD的checkpoint</span></span><br><span class="line">        rdd.doCheckpoint()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -456,8 +464,8 @@
     </a>
   
   
-    <a href="/2023/02/25/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">【Spark源码解读】TaskSchedulerImpl</div>
+    <a href="/2023/02/28/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91Executor%E4%B8%8A%E7%9A%84%E6%89%A7%E8%A1%8C/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">【Spark源码解读】Executor上的执行</div>
       <i class="icon-circle-right"></i>
     </a>
   

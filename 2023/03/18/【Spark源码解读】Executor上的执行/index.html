@@ -8,17 +8,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Category: Spark源码解读 | 小张的技术小木屋</title>
+  <title>【Spark源码解读】Executor上的执行 | 小张的技术小木屋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
-<meta property="og:type" content="website">
-<meta property="og:title" content="小张的技术小木屋">
-<meta property="og:url" content="http://example.com/categories/Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/index.html">
+  <meta name="description" content="上一篇，我们主要分析了一次作业的提交过程，严格说是在driver端的过程，作业提交之后经过DAGScheduler根据shuffle依赖关系划分成多个stage，依次提交每个stage，将每个stage创建于分区数相同数量的Task，并包装成一个任务集，交给TaskSchedulerImpl进行分配。 TaskSchedulerImpl则会根据SchedulerBackEnd提供的计算资源（exe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Spark源码解读】Executor上的执行">
+<meta property="og:url" content="http://example.com/2023/03/18/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91Executor%E4%B8%8A%E7%9A%84%E6%89%A7%E8%A1%8C/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
-<meta property="og:description" content="小张个人的技术总结blog，主要包含算法刷题和Java学习相关内容">
+<meta property="og:description" content="上一篇，我们主要分析了一次作业的提交过程，严格说是在driver端的过程，作业提交之后经过DAGScheduler根据shuffle依赖关系划分成多个stage，依次提交每个stage，将每个stage创建于分区数相同数量的Task，并包装成一个任务集，交给TaskSchedulerImpl进行分配。 TaskSchedulerImpl则会根据SchedulerBackEnd提供的计算资源（exe">
 <meta property="og:locale">
+<meta property="article:published_time" content="2023-03-18T02:31:48.000Z">
+<meta property="article:modified_time" content="2023-06-02T05:07:41.729Z">
 <meta property="article:author" content="Chenzuo Zhang">
-<meta property="article:tag" content="Java,Leetcode,工程师,代码,后端开发,大数据开发">
+<meta property="article:tag" content="Spark">
+<meta property="article:tag" content="Big Data">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="小张的技术小木屋" type="application/atom+xml">
@@ -192,203 +195,227 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-【Spark源码解读】Executor上的执行" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2023" class="archive-year">2023</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-
-<a href="/2023/05/10/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DiskStock/" class="archive-article-date">
-  	<time datetime="2023-05-10T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-05-10</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2023/05/10/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DiskStock/">【Spark源码解读】DiskStock</a>
+    <h1 class="article-title" itemprop="name">
+      【Spark源码解读】Executor上的执行
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Spark</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Big Data</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+        
+        <!-- 不蒜子统计 -->
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
 
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Spark源码解读//" class="article-tag-list-link color5">Spark源码解读</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-
-<a href="/2023/05/09/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91BlockManager/" class="archive-article-date">
-  	<time datetime="2023-05-09T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-05-09</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2023/05/09/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91BlockManager/">【Spark源码解读】BlockManager</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Spark</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Big Data</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Spark源码解读//" class="article-tag-list-link color5">Spark源码解读</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-
-<a href="/2023/04/10/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91shuffleManager/" class="archive-article-date">
-  	<time datetime="2023-04-10T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-04-10</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2023/04/10/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91shuffleManager/">【Spark源码解读】ShuffleManager</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Spark</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Big Data</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Spark源码解读//" class="article-tag-list-link color5">Spark源码解读</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
 
 <a href="/2023/03/18/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91Executor%E4%B8%8A%E7%9A%84%E6%89%A7%E8%A1%8C/" class="archive-article-date">
   	<time datetime="2023-03-18T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-03-18</time>
 </a>
-        </div>
-    	 
+        <!-- 需要添加的位置 -->
+        <!-- 开始添加字数统计-->
+        
+          <div style="margin-top:10px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">4.6k字</span>
+      </span>
+    </span>
+
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">  阅读时长: </span>
+        <span class="post-count">18分</span>
+      </span>
+    </span>
+</div>
+
+          
+        <!-- 添加完成 -->
+
+        
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2023/03/18/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91Executor%E4%B8%8A%E7%9A%84%E6%89%A7%E8%A1%8C/">【Spark源码解读】Executor上的执行</a>
-    </h1>
+    <span class="archive-article-date">
+        阅读量 <span id="busuanzi_value_page_pv"></span>
+    </span>
   
 
-        <div class="article-info info-on-right">
-          
+      </header>
+    
+
+  <div class="article-entry" itemprop="articleBody">
+   
+
+	
+		<p>上一篇，我们主要分析了一次作业的提交过程，严格说是在<code>driver</code>端的过程，作业提交之后经过<code>DAGScheduler</code>根据shuffle依赖关系划分成多个stage，依次提交每个stage，将每个stage创建于分区数相同数量的Task，并包装成一个任务集，交给<code>TaskSchedulerImpl</code>进行分配。</p>
+<p><code>TaskSchedulerImpl</code>则会根据<code>SchedulerBackEnd</code>提供的计算资源（executor），并考虑任务本地性，黑名单，调度池的调度顺序等因素对任务按照round-robin的方式进行分配，并将Task与executor的分配关系包装成<code>TaskDescription</code>返回给<code>SchedulerBackEnd</code>。</p>
+<p>然后<code>SchedulerBackEnd</code>就会根据收到的<code>TaskDescription</code>将任务再次序列化之后发送到对应的<code>executor</code>上执行。</p>
+<p>本篇，我们就来分析一下Task在<code>executor</code>上的执行过程。</p>
+<a id="more"></a>
+
+<ul>
+<li><a href="#coarsegrainedexecutorbackend">CoarseGrainedExecutorBackend</a><ul>
+<li><a href="#%E4%BB%BB%E5%8A%A1%E6%89%A7%E8%A1%8C%E5%85%A5%E5%8F%A3executorlaunchtask">任务执行入口Executor.launchTask</a></li>
+</ul>
+</li>
+<li><a href="#executor%E6%A6%82%E8%BF%B0">Executor概述</a><ul>
+<li><a href="#executorlaunchtask">Executor.launchTask</a></li>
+<li><a href="#taskrunnerrun">TaskRunner.run</a></li>
+<li><a href="#taskrun">Task.run</a></li>
+</ul>
+</li>
+<li><a href="#resulttaskruntask">ResultTask.runTask</a></li>
+<li><a href="#shufflemaptaskruntask">ShuffleMapTask.runTask</a><ul>
+<li><a href="#sortshufflewriterwrite">SortShuffleWriter.write</a></li>
+</ul>
+</li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+<blockquote>
+<p>太长不看系列：</p>
+</blockquote>
+<ul>
+<li>首先executor端的rpc服务端点（比如<code>CoarseGrainedExecutorBackend</code>）收到<code>LaunchTask</code>的消息，并对传过来的任务数据 data 进行反序列化成<code>TaskDescription</code>.</li>
+<li>将任务交给Executor对象运行</li>
+<li>Executor根据传过来的<code>TaskDescription</code>对象创建一个<code>TaskRunner</code>对象，并放到线程池中运行。这里的线程池用的是Executors.newCachedThreadPool，空闲是不会有线程在跑</li>
+<li><code>TaskRunner</code>对任务进一步反序列化，调用<code>Task.run</code>方法执行任务运行逻辑<ul>
+<li><code>ShuffleMapTask</code>类型的任务会将rdd计算结果数据经过排序合并之后写到一个文件中，并写一个索引文件</li>
+<li><code>ResultTask</code>类型任务会根据func执行计算。</li>
+</ul>
+</li>
+<li>任务运行完成后会更新一些任务统计量和度量系统中的一些统计量</li>
+<li>最后会根据结果序列化后的大小选择不同的方式将结果传回driver。</li>
+</ul>
+<h1 id="CoarseGrainedExecutorBackend"><a href="#CoarseGrainedExecutorBackend" class="headerlink" title="CoarseGrainedExecutorBackend"></a>CoarseGrainedExecutorBackend</h1><p><code>SchedulerBackend</code>特质有两个实现子类<code>CoarseGrainedExecutorBackend</code>和<code>LocalSchedulerBackend</code>。在local部署模式下使用<code>LocalSchedulerBackend</code>模式，在其他模式下使用<code>CoarseGrainedExecutorBackend</code>。这两个子类也继承了<code>ExecutorBackend</code>特质。</p>
+<p>我们将主要分析后者。</p>
+<p><code>CoarseGrainedExecutorBackend</code>是<code>Driver</code>和<code>Executor</code>通信的后端接口。</p>
+<h2 id="任务执行入口Executor-launchTask"><a href="#任务执行入口Executor-launchTask" class="headerlink" title="任务执行入口Executor.launchTask"></a>任务执行入口Executor.launchTask</h2><p>首先，我们知道<code>CoarseGrainedExecutorBackend</code>是yarn模式下的executor的实现类，这时一个rpc服务端，所以我们根据rpc客户端也就是<code>CoarseGrainedSchedulerBackEnd</code>发送的消息，然后在服务端找到处理对应消息的方法，顺藤摸瓜就能找到Task执行的入口。</p>
+<p>通过上一篇的分析知道发送任务时，<code>CoarseGrainedSchedulerBackEnd</code>发送的是一个<code>LaunchTask</code>类型的消息，我们看一下<code>CoarseGrainedExecutorBackend.receive</code>方法，其中对于<code>LaunchTask</code>消息的处理如下：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> <span class="type">LaunchTask</span>(data) =&gt;</span><br><span class="line">  <span class="keyword">if</span> (executor == <span class="literal">null</span>) &#123;</span><br><span class="line">    exitExecutor(<span class="number">1</span>, <span class="string">&quot;Received LaunchTask command but executor was null&quot;</span>)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">val</span> taskDesc = <span class="type">TaskDescription</span>.decode(data.value)</span><br><span class="line">    logInfo(<span class="string">&quot;Got assigned task &quot;</span> + taskDesc.taskId)</span><br><span class="line">    executor.launchTask(<span class="keyword">this</span>, taskDesc)</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，实际上任务交给内部的<code>Executor</code>对象来处理，实际上<code>Executor</code>对象承担了<code>executor</code>端的绝大部分逻辑，可以认为<code>CoarseGrainedExecutorBackend</code>仅仅是充当在executor机器上的rpc消息中转的角色，充当spark的rpc框架中端点的角色，而实际的任务执行的逻辑则是由<code>Executor</code>对象来完成的。</p>
+<h1 id="Executor概述"><a href="#Executor概述" class="headerlink" title="Executor概述"></a>Executor概述</h1><p>我们先来看一下Executor类的说明：Spark 执行器，由线程池支持以运行任务。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * Spark executor, backed by a threadpool to run tasks.</span><br><span class="line"> *</span><br><span class="line"> * This can be used with Mesos, YARN, and the standalone scheduler.</span><br><span class="line"> * An internal RPC interface is used for communication with the driver,</span><br><span class="line"> * except in the case of Mesos fine-grained mode.</span><br><span class="line"> *&#x2F;</span><br></pre></td></tr></table></figure>
+<p>Executor内部有一个线程池用来运行任务，Mesos, YARN, 和 standalone模式都是用这个类作为任务运行的逻辑。此外Executor对象持有<code>SparkEnv</code>的引用，以此来使用spark的一些基础设施，包括rpc引用。</p>
+<p>我们还是以任务运行为线索分析这个类的代码。</p>
+<h2 id="Executor-launchTask"><a href="#Executor-launchTask" class="headerlink" title="Executor.launchTask"></a>Executor.launchTask</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">launchTask</span></span>(context: <span class="type">ExecutorBackend</span>, taskDescription: <span class="type">TaskDescription</span>): <span class="type">Unit</span> = &#123;</span><br><span class="line">  <span class="keyword">val</span> tr = <span class="keyword">new</span> <span class="type">TaskRunner</span>(context, taskDescription)</span><br><span class="line">  runningTasks.put(taskDescription.taskId, tr)</span><br><span class="line">  threadPool.execute(tr)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>executor</code>收到<code>TaskDescription</code>以后封装成为了一个<code>TaskRunner</code>，然后放到线程池去执行。从这个地方也能看出来，在executor端，<strong>一个task对应一个线程</strong>。</p>
+<p><code>TaskRunner</code>这个类实现<code>Runnable</code>接口，包括了一个run方法，可以让线程池去执行任务。所以接下来我们就看一下<code>TaskRunner</code>这个类。</p>
+<h2 id="TaskRunner-run"><a href="#TaskRunner-run" class="headerlink" title="TaskRunner.run"></a>TaskRunner.run</h2><p>其中有一些统计量我就不说了，比如任务运行时间统计，cpu耗时统计，gc耗时统计等等，这里有一点可以积累的地方是MXBean，cpu，gc耗时都是通过获取jvm内置的相关的MXBean获取到的，入口类是<code>ManagementFactory</code>，具体的可以细看，这里不再展开。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">run</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="comment">// 省略获取threadId，设置TreadName的代码</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 内存管理器</span></span><br><span class="line">    <span class="keyword">val</span> taskMemoryManager = <span class="keyword">new</span> <span class="type">TaskMemoryManager</span>(env.memoryManager, taskId)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 省略代码，记录反序列化的耗时/CPU耗时，</span></span><br><span class="line"></span><br><span class="line">    <span class="type">Thread</span>.currentThread.setContextClassLoader(replClassLoader)</span><br><span class="line">    <span class="keyword">val</span> ser = env.closureSerializer.newInstance()</span><br><span class="line">    logInfo(<span class="string">s&quot;Running <span class="subst">$taskName</span> (TID <span class="subst">$taskId</span>)&quot;</span>)</span><br><span class="line">    <span class="comment">// TODO 通过executor后端向driver发送一个任务状态更新的消息</span></span><br><span class="line">    execBackend.statusUpdate(taskId, <span class="type">TaskState</span>.<span class="type">RUNNING</span>, <span class="type">EMPTY_BYTE_BUFFER</span>) <span class="comment">// 更新Task状态</span></span><br><span class="line">    <span class="keyword">var</span> taskStart: <span class="type">Long</span> = <span class="number">0</span></span><br><span class="line">    <span class="keyword">var</span> taskStartCpu: <span class="type">Long</span> = <span class="number">0</span></span><br><span class="line">    <span class="comment">// 依然是通过MXBean获取gc总时长</span></span><br><span class="line">    startGCTime = computeTotalGcTime()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// TODO 更新依赖的文件和jar包，从driver端拉取到本地，并缓存下来</span></span><br><span class="line">    updateDependencies(taskDescription.addedFiles, taskDescription.addedJars)</span><br><span class="line">    <span class="comment">// 对任务进行反序列化，这里却并没有进行耗时统计</span></span><br><span class="line">    task = ser.deserialize[<span class="type">Task</span>[<span class="type">Any</span>]](</span><br><span class="line">        taskDescription.serializedTask, <span class="type">Thread</span>.currentThread.getContextClassLoader)</span><br><span class="line">    <span class="comment">// 属性集合也是从driver端跟随taskDescription一起发送过来的</span></span><br><span class="line">    task.localProperties = taskDescription.properties</span><br><span class="line">    <span class="comment">// 设置内存管理器</span></span><br><span class="line">    task.setTaskMemoryManager(taskMemoryManager)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!isLocal) &#123;</span><br><span class="line">        logDebug(<span class="string">&quot;Task &quot;</span> + taskId + <span class="string">&quot;&#x27;s epoch is &quot;</span> + task.epoch)</span><br><span class="line">        <span class="comment">// 更新epoch值和map输出状态</span></span><br><span class="line">        env.mapOutputTracker.asInstanceOf[<span class="type">MapOutputTrackerWorker</span>].updateEpoch(task.epoch)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 运行任务并统计运行时间</span></span><br><span class="line">    taskStart = <span class="type">System</span>.currentTimeMillis()</span><br><span class="line">    <span class="comment">// 统计当前线程的cpu耗时</span></span><br><span class="line">    taskStartCpu = <span class="keyword">if</span> (threadMXBean.isCurrentThreadCpuTimeSupported) &#123;</span><br><span class="line">        threadMXBean.getCurrentThreadCpuTime</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="number">0</span>L</span><br><span class="line">    <span class="keyword">var</span> threwException = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> value = <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 调用task.run方法运行任务</span></span><br><span class="line">        <span class="keyword">val</span> res = task.run(</span><br><span class="line">        <span class="comment">// 任务id</span></span><br><span class="line">        taskAttemptId = taskId,</span><br><span class="line">        <span class="comment">// 任务的尝试次数</span></span><br><span class="line">        attemptNumber = taskDescription.attemptNumber,</span><br><span class="line">        <span class="comment">// 度量系统</span></span><br><span class="line">        metricsSystem = env.metricsSystem)</span><br><span class="line">        threwException = <span class="literal">false</span></span><br><span class="line">        res</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="comment">// 释放关于该任务的所有锁, 该任务相关的block的读写锁</span></span><br><span class="line">        <span class="keyword">val</span> releasedLocks = env.blockManager.releaseAllLocksForTask(taskId)</span><br><span class="line">        <span class="comment">// 清除所有分配给该任务的内存空间</span></span><br><span class="line">        <span class="keyword">val</span> freedMemory = taskMemoryManager.cleanUpAllAllocatedMemory()</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 如果threwException为false，说明任务正常运行完成</span></span><br><span class="line">        <span class="comment">// 在任务正常运行完的前提下如果还能够释放出内存，</span></span><br><span class="line">        <span class="comment">// 说明在任务正常执行的过程中没有正确地释放使用的内存，也就是发生了内存泄漏</span></span><br><span class="line">        <span class="keyword">if</span> (freedMemory &gt; <span class="number">0</span> &amp;&amp; !threwException) &#123;</span><br><span class="line">            <span class="keyword">val</span> errMsg = <span class="string">s&quot;Managed memory leak detected; size = <span class="subst">$freedMemory</span> bytes, TID = <span class="subst">$taskId</span>&quot;</span></span><br><span class="line">            <span class="keyword">if</span> (conf.getBoolean(<span class="string">&quot;spark.unsafe.exceptionOnMemoryLeak&quot;</span>, <span class="literal">false</span>)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">SparkException</span>(errMsg)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                logWarning(errMsg)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 这里对于锁资源的检测和内存资源的检测是相同的逻辑</span></span><br><span class="line">        <span class="comment">// spark作者认为，具体的任务应该自己负责将申请的资源（包括内存和锁资源）在使用完后释放掉，</span></span><br><span class="line">        <span class="comment">// 不能依赖于靠后面的补救措施</span></span><br><span class="line">        <span class="comment">// 如果没有正常释放，就发生了资源泄漏</span></span><br><span class="line">        <span class="comment">// 这里则是对锁锁资源泄漏的检查</span></span><br><span class="line">        <span class="keyword">if</span> (releasedLocks.nonEmpty &amp;&amp; !threwException) &#123;</span><br><span class="line">            <span class="keyword">val</span> errMsg =</span><br><span class="line">                <span class="string">s&quot;<span class="subst">$&#123;releasedLocks.size&#125;</span> block locks were not released by TID = <span class="subst">$taskId</span>:\n&quot;</span> +</span><br><span class="line">                releasedLocks.mkString(<span class="string">&quot;[&quot;</span>, <span class="string">&quot;, &quot;</span>, <span class="string">&quot;]&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> (conf.getBoolean(<span class="string">&quot;spark.storage.exceptionOnPinLeak&quot;</span>, <span class="literal">false</span>)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">SparkException</span>(errMsg)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                logInfo(errMsg)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 省略 打印拉取异常日志</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 统计任务完成时间</span></span><br><span class="line">    <span class="keyword">val</span> taskFinish = <span class="type">System</span>.currentTimeMillis()</span><br><span class="line">    <span class="comment">// 统计任务线程占用的cpu时间</span></span><br><span class="line">    <span class="keyword">val</span> taskFinishCpu = <span class="keyword">if</span> (threadMXBean.isCurrentThreadCpuTimeSupported) &#123;</span><br><span class="line">        threadMXBean.getCurrentThreadCpuTime</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="number">0</span>L</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 任务结果的序列化</span></span><br><span class="line">    <span class="keyword">val</span> resultSer = env.serializer.newInstance()</span><br><span class="line">    <span class="keyword">val</span> beforeSerialization = <span class="type">System</span>.currentTimeMillis()</span><br><span class="line">    <span class="keyword">val</span> valueBytes = resultSer.serialize(value)</span><br><span class="line">    <span class="keyword">val</span> afterSerialization = <span class="type">System</span>.currentTimeMillis()</span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">    <span class="comment">// 省略更新metrics的代码</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> accumUpdates = task.collectAccumulatorUpdates()</span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> do not serialize value twice</span></span><br><span class="line">    <span class="keyword">val</span> directResult = <span class="keyword">new</span> <span class="type">DirectTaskResult</span>(valueBytes, accumUpdates)</span><br><span class="line">    <span class="keyword">val</span> serializedDirectResult = ser.serialize(directResult)</span><br><span class="line">    <span class="keyword">val</span> resultSize = serializedDirectResult.limit()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将执行结果发送给Driver</span></span><br><span class="line">    <span class="keyword">val</span> serializedResult: <span class="type">ByteBuffer</span> = &#123;</span><br><span class="line">        <span class="comment">// 运行结果太大，将结果的大小序列化为serializedResult，不保存结果</span></span><br><span class="line">        <span class="keyword">if</span> (maxResultSize &gt; <span class="number">0</span> &amp;&amp; resultSize &gt; maxResultSize) &#123;</span><br><span class="line">            logWarning(<span class="string">s&quot;Finished <span class="subst">$taskName</span> (TID <span class="subst">$taskId</span>). Result is larger than maxResultSize &quot;</span> +</span><br><span class="line">                <span class="string">s&quot;(<span class="subst">$&#123;Utils.bytesToString(resultSize)&#125;</span> &gt; <span class="subst">$&#123;Utils.bytesToString(maxResultSize)&#125;</span>), &quot;</span> +</span><br><span class="line">                <span class="string">s&quot;dropping it.&quot;</span>)</span><br><span class="line">            ser.serialize(<span class="keyword">new</span> <span class="type">IndirectTaskResult</span>[<span class="type">Any</span>](<span class="type">TaskResultBlockId</span>(taskId), resultSize))</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (resultSize &gt; maxDirectResultSize) &#123;</span><br><span class="line">            <span class="comment">// 运行结果一般，将结果写入本地存储，然后结果大小序列化为serializedResult</span></span><br><span class="line">            <span class="keyword">val</span> blockId = <span class="type">TaskResultBlockId</span>(taskId)</span><br><span class="line">            env.blockManager.putBytes(</span><br><span class="line">                blockId,</span><br><span class="line">                <span class="keyword">new</span> <span class="type">ChunkedByteBuffer</span>(serializedDirectResult.duplicate()),</span><br><span class="line">                <span class="type">StorageLevel</span>.<span class="type">MEMORY_AND_DISK_SER</span>)</span><br><span class="line">            logInfo(</span><br><span class="line">                <span class="string">s&quot;Finished <span class="subst">$taskName</span> (TID <span class="subst">$taskId</span>). <span class="subst">$resultSize</span> bytes result sent via BlockManager&quot;</span>)</span><br><span class="line">            ser.serialize(<span class="keyword">new</span> <span class="type">IndirectTaskResult</span>[<span class="type">Any</span>](blockId, resultSize))</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 结果比较小，直接序列化结果。</span></span><br><span class="line">            logInfo(<span class="string">s&quot;Finished <span class="subst">$taskName</span> (TID <span class="subst">$taskId</span>). <span class="subst">$resultSize</span> bytes result sent to driver&quot;</span>)</span><br><span class="line">            serializedDirectResult</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    setTaskFinishedAndClearInterruptStatus()</span><br><span class="line">    execBackend.statusUpdate(taskId, <span class="type">TaskState</span>.<span class="type">FINISHED</span>, serializedResult)</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">        <span class="comment">// 省略异常处理</span></span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        runningTasks.remove(taskId)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总结一下这个方法的主要步骤：</p>
+<ul>
+<li><p>创建Task需要的TaskMemoryManager。</p>
+</li>
+<li><p>向driver发送一个更新任务状态的消息，通知driver这个task处于运行的状态。</p>
+</li>
+<li><p>对任务进行反序列化生成Task对象，根据任务类型可能是ShuffleMapTask或者ResultTask。得到任务需要的taskFiles（文件）, taskJars（任务jar包）, taskProps（任务属性）, taskBytes（任务本身）。</p>
+<ul>
+<li>taskProps放入ThreadLocal</li>
+<li>从taskFiles, taskJars得到任务依赖。</li>
+<li>对taskBytes再次反序列得到task实例。</li>
+</ul>
+</li>
+<li><p>检查任务有没有被杀死，如果被杀死则抛出一个异常；（driver随时都可能发送一个杀死任务的消息）</p>
+</li>
+<li><p>调用<code>Task.run</code>方法执行任务的运行逻辑</p>
+</li>
+<li><p>任务运行结束后，清除未正常释放的内存资源和block锁资源，进行资源回收。</p>
+</li>
+<li><p>更新度量系统中的相关统计量</p>
+</li>
+<li><p>将任务运行的结果数据序列化。检测序列化后的体积，有两个阈值：maxResultSize和maxDirectResultSize，</p>
+<ul>
+<li>如果超过maxResultSize直接丢弃结果，就是不往<code>blockmanager</code>里面写数据，这样<code>driver</code>端在试图通过<code>blockmanager</code>远程拉取数据的时候就获取不到数据，这时driver就知道这个任务的结果数据太大，失败了；</li>
+<li>而对于体积超过maxDirectResultSize的情况，会将任务结果数据通过<code>blockmanager</code>写到本地内存和磁盘，然后将block信息发送给driver, driver会根据这些信息来这个节点拉取数据；</li>
+<li>如果体积小于maxDirectResultSize，则直接通过rpc接口将结果数据发送给driver。</li>
+</ul>
+</li>
+<li><p>最后还会有对任务失败的各种总异常的处理。</p>
+<h2 id="Task-run"><a href="#Task-run" class="headerlink" title="Task.run"></a>Task.run</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="function"><span class="keyword">def</span> <span class="title">run</span></span>(</span><br><span class="line">  taskAttemptId: <span class="type">Long</span>,</span><br><span class="line">  attemptNumber: <span class="type">Int</span>,</span><br><span class="line">  metricsSystem: <span class="type">MetricsSystem</span>): <span class="type">T</span> = &#123;</span><br><span class="line">    <span class="comment">// 调用BlockManager的registerTask，注册信息。</span></span><br><span class="line">    <span class="type">SparkEnv</span>.get.blockManager.registerTask(taskAttemptId)</span><br><span class="line">    <span class="comment">// 创建任务上下文</span></span><br><span class="line">    context = <span class="keyword">new</span> <span class="type">TaskContextImpl</span>(</span><br><span class="line">        stageId,</span><br><span class="line">        stageAttemptId, <span class="comment">// stageAttemptId and stageAttemptNumber are semantically equal</span></span><br><span class="line">        partitionId,</span><br><span class="line">        taskAttemptId,</span><br><span class="line">        attemptNumber,</span><br><span class="line">        taskMemoryManager,</span><br><span class="line">        localProperties,</span><br><span class="line">        <span class="comment">// 度量系统就是SparkEnv的度量对象</span></span><br><span class="line">        metricsSystem,</span><br><span class="line">        metrics)</span><br><span class="line">    <span class="comment">// 将任务尝试的上下文保存到ThreadLocal中</span></span><br><span class="line">    <span class="type">TaskContext</span>.setTaskContext(context)</span><br><span class="line">    <span class="comment">// 获取运行任务尝试的线程</span></span><br><span class="line">    taskThread = <span class="type">Thread</span>.currentThread()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果被kill，将任务和上下文标记为kill</span></span><br><span class="line">    <span class="keyword">if</span> (_reasonIfKilled != <span class="literal">null</span>) &#123;</span><br><span class="line">        kill(interruptThread = <span class="literal">false</span>, _reasonIfKilled)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">new</span> <span class="type">CallerContext</span>(</span><br><span class="line">        <span class="string">&quot;TASK&quot;</span>,</span><br><span class="line">        <span class="type">SparkEnv</span>.get.conf.get(<span class="type">APP_CALLER_CONTEXT</span>),</span><br><span class="line">        appId,</span><br><span class="line">        appAttemptId,</span><br><span class="line">        jobId,</span><br><span class="line">        <span class="type">Option</span>(stageId),</span><br><span class="line">        <span class="type">Option</span>(stageAttemptId),</span><br><span class="line">        <span class="type">Option</span>(taskAttemptId),</span><br><span class="line">        <span class="type">Option</span>(attemptNumber))</span><br><span class="line">    .setCurrentContext()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        runTask(context) <span class="comment">// 调用子类实现的runTask方法尝试任务。</span></span><br><span class="line">    &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> e: <span class="type">Throwable</span> =&gt;</span><br><span class="line">                <span class="comment">// Catch all errors; run task failure callbacks, and rethrow the exception.</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                context.markTaskFailed(e)</span><br><span class="line">            &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">                <span class="keyword">case</span> t: <span class="type">Throwable</span> =&gt;</span><br><span class="line">                    e.addSuppressed(t)</span><br><span class="line">                &#125;</span><br><span class="line">            <span class="keyword">throw</span> e</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        context.markTaskCompleted()</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">Utils</span>.tryLogNonFatalError &#123;</span><br><span class="line">                <span class="comment">// 释放内存快管理器中该任务使用的内存，最终是通过内存管理器来释放的</span></span><br><span class="line">                <span class="comment">// 实际上就是更新内存管理器内部的一些用于记录内存使用情况的簿记量</span></span><br><span class="line">                <span class="comment">// 真正的内存回收肯定还是有gc来完成的</span></span><br><span class="line">                <span class="type">SparkEnv</span>.get.blockManager.memoryStore.releaseUnrollMemoryForThisTask(<span class="type">MemoryMode</span>.<span class="type">ON_HEAP</span>)</span><br><span class="line">                <span class="type">SparkEnv</span>.get.blockManager.memoryStore.releaseUnrollMemoryForThisTask(<span class="type">MemoryMode</span>.<span class="type">OFF_HEAP</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">val</span> memoryManager = <span class="type">SparkEnv</span>.get.memoryManager</span><br><span class="line">                <span class="comment">// 内存释放之后，需要通知其他在等待内存资源的 线程</span></span><br><span class="line">                memoryManager.synchronized &#123; memoryManager.notifyAll() &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">// 移除ThreadLocal中保存的当前任务尝试线程的上下文</span></span><br><span class="line">            <span class="type">TaskContext</span>.unset()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>代码总结：</p>
+</li>
+<li><p>调用BlockManager的registerTask，注册信息。</p>
+</li>
+<li><p>创建任务尝试的上下文TaskContextImpl，并设置到一个ThreadLocal变量中</p>
+</li>
+<li><p>检查任务是否被杀死</p>
+</li>
+<li><p>创建调用者上下文CallerContext</p>
+</li>
+<li><p>调用子类实现的runTask方法执行实际的任务逻辑</p>
+</li>
+<li><p>无论task是否成功，都会在finally调用TaskContextImpl的markTaskComplete方法。</p>
+</li>
+<li><p>最后会释放在shuffle过程中申请的用于数据unroll的内存资源，释放堆内和堆外内存，唤醒其他任务。移除ThreadLocal中保存的当前Task线程的TaskContextImpl</p>
+</li>
+</ul>
+<p>所以，接下来我们要分析的肯定就是runTask方法，而这个方法是个抽象方法，在<code>ResultTask</code>和<code>ShuffleMapTask</code>有不同的实现。</p>
+<h1 id="ResultTask-runTask"><a href="#ResultTask-runTask" class="headerlink" title="ResultTask.runTask"></a>ResultTask.runTask</h1><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">runTask</span></span>(context: <span class="type">TaskContext</span>): <span class="type">U</span> = &#123;</span><br><span class="line">  <span class="comment">// Deserialize the RDD and the func using the broadcast variables.</span></span><br><span class="line">  <span class="keyword">val</span> threadMXBean = <span class="type">ManagementFactory</span>.getThreadMXBean</span><br><span class="line">  <span class="keyword">val</span> deserializeStartTimeNs = <span class="type">System</span>.nanoTime()</span><br><span class="line">  <span class="keyword">val</span> deserializeStartCpuTime = <span class="keyword">if</span> (threadMXBean.isCurrentThreadCpuTimeSupported) &#123;</span><br><span class="line">    threadMXBean.getCurrentThreadCpuTime</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="number">0</span>L</span><br><span class="line">  <span class="keyword">val</span> ser = <span class="type">SparkEnv</span>.get.closureSerializer.newInstance()</span><br><span class="line">  <span class="comment">// 反序列化task，得到RDD和需要执行的func</span></span><br><span class="line">  <span class="keyword">val</span> (rdd, func) = ser.deserialize[(<span class="type">RDD</span>[<span class="type">T</span>], (<span class="type">TaskContext</span>, <span class="type">Iterator</span>[<span class="type">T</span>]) =&gt; <span class="type">U</span>)](</span><br><span class="line">    <span class="type">ByteBuffer</span>.wrap(taskBinary.value), <span class="type">Thread</span>.currentThread.getContextClassLoader)</span><br><span class="line">  _executorDeserializeTimeNs = <span class="type">System</span>.nanoTime() - deserializeStartTimeNs</span><br><span class="line">  _executorDeserializeCpuTime = <span class="keyword">if</span> (threadMXBean.isCurrentThreadCpuTimeSupported) &#123;</span><br><span class="line">    threadMXBean.getCurrentThreadCpuTime - deserializeStartCpuTime</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="number">0</span>L</span><br><span class="line">  <span class="comment">// 调用RDD的iterator方法进行迭代计算和最终处理。</span></span><br><span class="line">  func(context, rdd.iterator(partition, context))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总结：</p>
+<ol>
+<li>反序列化task，得到RDD和需要执行的func</li>
+<li>调用RDD的iterator方法进行迭代计算和最终处理。<h1 id="ShuffleMapTask-runTask"><a href="#ShuffleMapTask-runTask" class="headerlink" title="ShuffleMapTask.runTask"></a>ShuffleMapTask.runTask</h1><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">runTask</span></span>(context: <span class="type">TaskContext</span>): <span class="type">MapStatus</span> = &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> threadMXBean = <span class="type">ManagementFactory</span>.getThreadMXBean</span><br><span class="line">    <span class="keyword">val</span> deserializeStartTime = <span class="type">System</span>.currentTimeMillis()</span><br><span class="line">    <span class="keyword">val</span> deserializeStartCpuTime = <span class="keyword">if</span> (threadMXBean.isCurrentThreadCpuTimeSupported) &#123;</span><br><span class="line">        threadMXBean.getCurrentThreadCpuTime</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="number">0</span>L</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> ser = <span class="type">SparkEnv</span>.get.closureSerializer.newInstance()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 反序列化RDD和shuffle, 关键的步骤</span></span><br><span class="line">    <span class="keyword">val</span> (rdd, dep) = ser.deserialize[(<span class="type">RDD</span>[_], <span class="type">ShuffleDependency</span>[_, _, _])](</span><br><span class="line">        <span class="type">ByteBuffer</span>.wrap(taskBinary.value), <span class="type">Thread</span>.currentThread.getContextClassLoader)</span><br><span class="line">    _executorDeserializeTime = <span class="type">System</span>.currentTimeMillis() - deserializeStartTime</span><br><span class="line">    _executorDeserializeCpuTime = <span class="keyword">if</span> (threadMXBean.isCurrentThreadCpuTimeSupported) &#123;</span><br><span class="line">        threadMXBean.getCurrentThreadCpuTime - deserializeStartCpuTime</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="number">0</span>L</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> writer: <span class="type">ShuffleWriter</span>[<span class="type">Any</span>, <span class="type">Any</span>] = <span class="literal">null</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// shuffle管理器</span></span><br><span class="line">        <span class="keyword">val</span> manager = <span class="type">SparkEnv</span>.get.shuffleManager</span><br><span class="line">        <span class="comment">// 获取一个shuffle写入器</span></span><br><span class="line">        writer = manager.getWriter[<span class="type">Any</span>, <span class="type">Any</span>](dep.shuffleHandle, partitionId, context)</span><br><span class="line">        writer.write(rdd.iterator(partition, context).asInstanceOf[<span class="type">Iterator</span>[_ &lt;: <span class="type">Product2</span>[<span class="type">Any</span>, <span class="type">Any</span>]]])</span><br><span class="line">        <span class="comment">// 主要是删除中间过程的溢写文件，向内存管理器释放申请的内存</span></span><br><span class="line">        writer.stop(success = <span class="literal">true</span>).get</span><br><span class="line">    &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> e: <span class="type">Exception</span> =&gt;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (writer != <span class="literal">null</span>) &#123;</span><br><span class="line">                    writer.stop(success = <span class="literal">false</span>)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">                <span class="keyword">case</span> e: <span class="type">Exception</span> =&gt; log.debug(<span class="string">&quot;Could not stop writer&quot;</span>, e)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">throw</span> e</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+这个方法还是大概逻辑还是很简单的。</li>
+</ol>
+<ul>
+<li>对任务反序列化，得到RDD和shuffleDependency。</li>
+<li>调用<code>sortShuffleManager</code>的getWriter方法，获得对执行分区的数据进行磁盘写的<code>sortShuffleWriter</code>。</li>
+<li>通过rdd的iterator方法获取当前task对应的分区的计算结果（结果一一个迭代器的形式返回）</li>
+<li>利用shuffleManager通过blockManager写入到文件block中，然后将block信息传回driver上报给BlockManagerMaster。</li>
+</ul>
+<p>这里可以看到rdd计算的核心方法就是iterator方法SortShuffleWriter的write方法可以分为几个步骤：</p>
+<ol>
+<li>将上游rdd计算出的数据(通过调用rdd.iterator方法)写入内存缓冲区，</li>
+<li>在写的过程中如果超过 内存阈值就会溢写磁盘文件，可能会写多个文件</li>
+<li>最后将溢写的文件和内存中剩余的数据一起进行归并排序后写入到磁盘中形成一个大的数据文件</li>
+<li>这个排序是先按分区排序，在按key排序</li>
+<li>在最后归并排序后写的过程中，没写一个分区就会手动刷写一遍，并记录下这个分区数据在文件中的位移。所以实际上最后写完一个task的数据后，磁盘上会有两个文件：数据文件和记录每个reduce端partition数据位移的索引文件</li>
+</ol>
+<p>所以实际上重要的步骤有两个：通过RDD的计算链获取计算结果；将计算结果经过排序和分区写到文件中。这里我先分析第二个步骤。</p>
+<h2 id="SortShuffleWriter-write"><a href="#SortShuffleWriter-write" class="headerlink" title="SortShuffleWriter.write"></a>SortShuffleWriter.write</h2><p>spark在2.0之后shuffle管理器改成了排序shuffle管理器，即<code>SortShuffleManager</code>，所以这里通过<code>SortShuffleManager</code>管理器获取到的在一般情况下都是<code>SortShuffleWriter</code>，当然在满足bypass条件（map端不需要combine，并且分区数小于200）的情况下会使用<code>BypassMergeSortShuffleWriter</code>。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">write</span></span>(records: <span class="type">Iterator</span>[<span class="type">Product2</span>[<span class="type">K</span>, <span class="type">V</span>]]): <span class="type">Unit</span> = &#123;</span><br><span class="line">    sorter = <span class="keyword">if</span> (dep.mapSideCombine) &#123;</span><br><span class="line">        <span class="comment">// map端进行合并的情况，此时用户应该提供聚合器和顺序</span></span><br><span class="line">        require(dep.aggregator.isDefined, <span class="string">&quot;Map-side combine without Aggregator specified!&quot;</span>)</span><br><span class="line">        <span class="comment">// 创建ExternalSorter</span></span><br><span class="line">        <span class="keyword">new</span> <span class="type">ExternalSorter</span>[<span class="type">K</span>, <span class="type">V</span>, <span class="type">C</span>](</span><br><span class="line">            context, dep.aggregator, <span class="type">Some</span>(dep.partitioner), dep.keyOrdering, dep.serializer)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="type">ExternalSorter</span>[<span class="type">K</span>, <span class="type">V</span>, <span class="type">V</span>](</span><br><span class="line">            context, aggregator = <span class="type">None</span>, <span class="type">Some</span>(dep.partitioner), ordering = <span class="type">None</span>, dep.serializer)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 将map数据全部写入排序器缓存中， 这个过程中可能会生成多个溢写文件</span></span><br><span class="line">    sorter.insertAll(records)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// mapId就是shuffleMap端RDD的partitionId</span></span><br><span class="line">    <span class="comment">// 获取这个map分区的shuffle输出文件</span></span><br><span class="line">    <span class="keyword">val</span> output = shuffleBlockResolver.getDataFile(dep.shuffleId, mapId)</span><br><span class="line">    <span class="comment">// 加一个uuid后缀</span></span><br><span class="line">    <span class="keyword">val</span> tmp = <span class="type">Utils</span>.tempFileWith(output)</span><br><span class="line">    <span class="keyword">try</span> &#123; <span class="comment">// 将map端缓存的数据写到磁盘，并生成Block文件对应的索引文件</span></span><br><span class="line">        <span class="keyword">val</span> blockId = <span class="type">ShuffleBlockId</span>(dep.shuffleId, mapId, <span class="type">IndexShuffleBlockResolver</span>.<span class="type">NOOP_REDUCE_ID</span>)</span><br><span class="line">        <span class="comment">// 这一步将溢写到的磁盘的文件和内存中的数据进行归并排序，并溢写到一个文件中，这一步写的文件是临时文件名</span></span><br><span class="line">        <span class="keyword">val</span> partitionLengths = sorter.writePartitionedFile(blockId, tmp)</span><br><span class="line">        <span class="comment">// 这一步主要是写入索引文件，使用move方法原子的将临时索引和临时数据文件重命名为正常的文件名</span></span><br><span class="line">        shuffleBlockResolver.writeIndexFileAndCommit(dep.shuffleId, mapId, partitionLengths, tmp)</span><br><span class="line">        <span class="comment">// 返回一个状态对象，包含shuffle服务Id和各个分区数据在文件中的位移</span></span><br><span class="line">        mapStatus = <span class="type">MapStatus</span>(blockManager.shuffleServerId, partitionLengths)</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (tmp.exists() &amp;&amp; !tmp.delete()) &#123;</span><br><span class="line">            logError(<span class="string">s&quot;Error while deleting temp file <span class="subst">$&#123;tmp.getAbsolutePath&#125;</span>&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总结一下这个方法的主要逻辑：</p>
+<ul>
+<li>首先获取一个排序器，并检查是否有map端的合并器</li>
+<li>将rdd计算结果数据写入排序器，过程中可能会溢写过个磁盘文件</li>
+<li>最后将多个碎小的溢写文件和内存缓冲区的数据进行归并排序，写到一个文件中</li>
+<li>将每个分区数据在文件中的偏移量写到一个索引文件中，用于reduce阶段拉取数据时使用</li>
+<li>返回一个MapStatus对象，封装了当前executor上的blockManager的id和每个分区在数据文件中的位移量</li>
+</ul>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总结一下任务在executor端的执行流程：</p>
+<ul>
+<li>首先executor端的rpc服务端点收到<code>LaunchTask</code>的消息，并对传过来的任务数据进行反序列化成<code>TaskDescription</code>.</li>
+<li>将任务交给Executor对象运行</li>
+<li>Executor根据传过来的<code>TaskDescription</code>对象创建一个<code>TaskRunner</code>对象，并放到线程池中运行。这里的线程池用的是Executors.newCachedThreadPool，空闲是不会有线程在跑</li>
+<li><code>TaskRunner</code>对任务进一步反序列化，调用<code>Task.run</code>方法执行任务运行逻辑<ul>
+<li><code>ShuffleMapTask</code>类型的任务会将rdd计算结果数据经过排序合并之后写到一个文件中，并写一个索引文件</li>
+<li><code>ResultTask</code>类型任务会根据func执行计算。</li>
+</ul>
+</li>
+<li>任务运行完成后会更新一些任务统计量和度量系统中的一些统计量</li>
+<li>最后会根据结果序列化后的大小选择不同的方式将结果传回driver。</li>
+</ul>
+
+	
+   
+
+
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -404,7 +431,7 @@
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -417,182 +444,113 @@
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2023/03/18/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91Executor%E4%B8%8A%E7%9A%84%E6%89%A7%E8%A1%8C/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
 
-<a href="/2023/03/02/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/" class="archive-article-date">
-  	<time datetime="2023-03-02T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-03-02</time>
-</a>
+  
+<nav id="article-nav">
+  
+    <a href="/2023/04/10/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91shuffleManager/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          【Spark源码解读】ShuffleManager
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/03/02/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">【Spark源码解读】TaskSchedulerImpl</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2023/03/02/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/">【Spark源码解读】TaskSchedulerImpl</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Spark</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Big Data</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Spark源码解读//" class="article-tag-list-link color5">Spark源码解读</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
 
-<a href="/2023/02/25/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DAGScheduler/" class="archive-article-date">
-  	<time datetime="2023-02-25T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-02-25</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2023/02/25/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DAGScheduler/">【Spark源码解读】DAGScheduler</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Spark</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Big Data</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Spark源码解读//" class="article-tag-list-link color5">Spark源码解读</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-
-<a href="/2023/02/20/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91SparkContext/" class="archive-article-date">
-  	<time datetime="2023-02-20T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-02-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2023/02/20/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91SparkContext/">【Spark源码解读】SparkContext</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Spark</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Big Data</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Spark源码解读//" class="article-tag-list-link color5">Spark源码解读</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -627,10 +585,10 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
-		isCategory: true,
+		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
 		root: "/",

@@ -13,12 +13,12 @@
   <meta name="description" content="上一篇讲到DAGScheduler根据shuffle依赖对作业的整个计算链划分成多个stage之后，就开始提交最后一个ResultStage，而由于stage之间的依赖关系，实际上最终是循着计算链从上到下依次提交stage的。每提交一个stage，就会将这个stage分成多个Task，并且会计算每个Task的偏向位置，将RDD和ShuffleDependency，TaskMetrics等对象序列化">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【Spark源码解读】TaskSchedulerImpl">
-<meta property="og:url" content="http://example.com/2023/02/25/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/index.html">
+<meta property="og:url" content="http://example.com/2023/03/02/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/index.html">
 <meta property="og:site_name" content="小张的技术小木屋">
 <meta property="og:description" content="上一篇讲到DAGScheduler根据shuffle依赖对作业的整个计算链划分成多个stage之后，就开始提交最后一个ResultStage，而由于stage之间的依赖关系，实际上最终是循着计算链从上到下依次提交stage的。每提交一个stage，就会将这个stage分成多个Task，并且会计算每个Task的偏向位置，将RDD和ShuffleDependency，TaskMetrics等对象序列化">
 <meta property="og:locale">
-<meta property="article:published_time" content="2023-02-25T02:31:48.000Z">
-<meta property="article:modified_time" content="2023-06-01T12:23:42.514Z">
+<meta property="article:published_time" content="2023-03-02T02:31:48.000Z">
+<meta property="article:modified_time" content="2023-06-02T05:07:22.872Z">
 <meta property="article:author" content="Chenzuo Zhang">
 <meta property="article:tag" content="Spark">
 <meta property="article:tag" content="Big Data">
@@ -214,8 +214,8 @@
         </span>
 
 
-<a href="/2023/02/25/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/" class="archive-article-date">
-  	<time datetime="2023-02-25T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-02-25</time>
+<a href="/2023/03/02/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/" class="archive-article-date">
+  	<time datetime="2023-03-02T02:31:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-03-02</time>
 </a>
         <!-- 需要添加的位置 -->
         <!-- 开始添加字数统计-->
@@ -426,7 +426,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2023/02/25/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2023/03/02/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91TaskSchedulerImpl/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -440,7 +440,7 @@
   
 <nav id="article-nav">
   
-    <a href="/2023/02/28/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91Executor%E4%B8%8A%E7%9A%84%E6%89%A7%E8%A1%8C/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2023/03/18/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91Executor%E4%B8%8A%E7%9A%84%E6%89%A7%E8%A1%8C/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
@@ -450,8 +450,8 @@
     </a>
   
   
-    <a href="/2023/02/20/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91SparkContext/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">【Spark源码解读】SparkContext</div>
+    <a href="/2023/02/25/%E3%80%90Spark%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91DAGScheduler/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">【Spark源码解读】DAGScheduler</div>
       <i class="icon-circle-right"></i>
     </a>
   
